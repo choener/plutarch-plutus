@@ -1,5 +1,5 @@
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE PolyKinds       #-}
+{-# LANGUAGE RankNTypes      #-}
 {-# LANGUAGE RoleAnnotations #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
@@ -117,11 +117,8 @@ module Plutarch.LedgerApi.V3 (
 ) where
 
 import Codec.Serialise (serialise)
-import Crypto.Hash (
-  Blake2b_224 (Blake2b_224),
-  Blake2b_256 (Blake2b_256),
-  hashWith,
- )
+import Crypto.Hash (Blake2b_224 (Blake2b_224), Blake2b_256 (Blake2b_256),
+                    hashWith)
 import Data.ByteArray (convert)
 import Data.ByteString (ByteString, toStrict)
 import Data.ByteString.Short (fromShort)

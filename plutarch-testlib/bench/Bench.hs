@@ -1,20 +1,13 @@
 module Main (main) where
 
-import Plutarch.Internal.Term (
-  Config (NoTracing, Tracing),
-  LogLevel (LogInfo),
-  TracingMode (DoTracing),
- )
-import Plutarch.LedgerApi.Utils (PMaybeData, pmapMaybeData, pmaybeDataToMaybe, pmaybeToMaybeData)
+import Plutarch.Internal.Term (Config (NoTracing, Tracing), LogLevel (LogInfo),
+                               TracingMode (DoTracing))
+import Plutarch.LedgerApi.Utils (PMaybeData, pmapMaybeData, pmaybeDataToMaybe,
+                                 pmaybeToMaybeData)
 import Plutarch.Maybe (pmapMaybe)
 import Plutarch.Prelude
-import Plutarch.Test.Bench (
-  BenchConfig (NonOptimizing, Optimizing),
-  bcompare,
-  bench,
-  benchWithConfig,
-  defaultMain,
- )
+import Plutarch.Test.Bench (BenchConfig (NonOptimizing, Optimizing), bcompare,
+                            bench, benchWithConfig, defaultMain)
 import Test.Tasty (TestTree, testGroup)
 
 import Plutarch.Test.Suite.Plutarch.Unroll (unrollBenches)

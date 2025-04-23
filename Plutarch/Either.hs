@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
@@ -31,61 +31,27 @@ module Plutarch.Either (
 ) where
 
 import Data.Kind (Type)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
-import Plutarch.Builtin.Bool (
-  PBool (PFalse, PTrue),
-  pif,
-  pif',
- )
-import Plutarch.Builtin.Data (
-  PAsData,
-  PData,
-  pasConstr,
-  pconstrBuiltin,
-  pfstBuiltin,
-  psndBuiltin,
- )
+import GHC.Generics (Generic)
+import Plutarch.Builtin.Bool (PBool (PFalse, PTrue), pif, pif')
+import Plutarch.Builtin.Data (PAsData, PData, pasConstr, pconstrBuiltin,
+                              pfstBuiltin, psndBuiltin)
 import Plutarch.Internal.Eq (PEq ((#==)))
-import Plutarch.Internal.IsData (PIsData (pdataImpl, pfromDataImpl), pdata, pforgetData, pfromData)
-import Plutarch.Internal.Lift (
-  DeriveDataPLiftable,
-  PLiftable (
-    AsHaskell,
-    PlutusRepr,
-    haskToRepr,
-    plutToRepr,
-    reprToHask,
-    reprToPlut
-  ),
-  PLifted (PLifted),
-  PLiftedClosed,
-  getPLiftedClosed,
-  mkPLifted,
-  mkPLiftedClosed,
-  pconstant,
-  pliftedFromClosed,
-  pliftedToClosed,
- )
+import Plutarch.Internal.IsData (PIsData (pdataImpl, pfromDataImpl), pdata,
+                                 pforgetData, pfromData)
+import Plutarch.Internal.Lift (DeriveDataPLiftable,
+                               PLiftable (AsHaskell, PlutusRepr, haskToRepr, plutToRepr, reprToHask, reprToPlut),
+                               PLifted (PLifted), PLiftedClosed,
+                               getPLiftedClosed, mkPLifted, mkPLiftedClosed,
+                               pconstant, pliftedFromClosed, pliftedToClosed)
 import Plutarch.Internal.ListLike (pcons, phead, pnil)
 import Plutarch.Internal.Ord (POrd (pmax, pmin, (#<), (#<=)))
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.PlutusType (
-  PlutusType (PInner, pcon', pmatch'),
-  pcon,
-  pmatch,
- )
+import Plutarch.Internal.PlutusType (PlutusType (PInner, pcon', pmatch'), pcon,
+                                     pmatch)
 import Plutarch.Internal.Show (PShow)
-import Plutarch.Internal.Term (
-  S,
-  Term,
-  phoistAcyclic,
-  plet,
-  (#),
-  (#$),
-  (:-->),
- )
+import Plutarch.Internal.Term (S, Term, phoistAcyclic, plet, (#$), (#), (:-->))
 import Plutarch.Internal.TryFrom (PTryFrom)
 import Plutarch.Repr.SOP (DeriveAsSOPStruct (DeriveAsSOPStruct))
 import Plutarch.Trace (ptraceInfoError)

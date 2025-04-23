@@ -33,20 +33,11 @@ import PlutusLedgerApi.V2 qualified as PLA
 import PlutusLedgerApi.V2.Orphans.Contexts ()
 import PlutusLedgerApi.V2.Orphans.Tx ()
 import PlutusTx.Prelude qualified as PlutusTx
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  Arbitrary1 (liftArbitrary),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  Gen,
-  NonNegative (NonNegative),
-  functionMap,
-  getNonNegative,
-  oneof,
-  resize,
-  sized,
-  variant,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        Arbitrary1 (liftArbitrary), CoArbitrary (coarbitrary),
+                        Function (function), Gen, NonNegative (NonNegative),
+                        functionMap, getNonNegative, oneof, resize, sized,
+                        variant)
 import Test.QuickCheck.Instances.ByteString ()
 
 -- | @since 1.0.0

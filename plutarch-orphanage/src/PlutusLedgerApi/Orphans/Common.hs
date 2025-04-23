@@ -19,22 +19,11 @@ import PlutusTx.AssocMap qualified as AssocMap
 import PlutusTx.Builtins qualified as Builtins
 import PlutusTx.Prelude qualified as PlutusTx
 import PlutusTx.Ratio (fromGHC, toGHC)
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  Arbitrary1 (liftArbitrary, liftShrink),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  Gen,
-  NonNegative (NonNegative),
-  functionMap,
-  getNonNegative,
-  liftArbitrary,
-  oneof,
-  scale,
-  shuffle,
-  sized,
-  variant,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        Arbitrary1 (liftArbitrary, liftShrink),
+                        CoArbitrary (coarbitrary), Function (function), Gen,
+                        NonNegative (NonNegative), functionMap, getNonNegative,
+                        liftArbitrary, oneof, scale, shuffle, sized, variant)
 
 -- | @since 1.1.0
 instance Arbitrary PlutusTx.Rational where

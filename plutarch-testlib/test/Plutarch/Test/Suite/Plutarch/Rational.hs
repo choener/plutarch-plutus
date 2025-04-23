@@ -2,7 +2,8 @@ module Plutarch.Test.Suite.Plutarch.Rational (tests) where
 
 import Plutarch.Prelude
 import Plutarch.Rational (pproperFraction, ptruncate)
-import Plutarch.Test.Golden (goldenEval, goldenEvalFail, goldenGroup, plutarchGolden)
+import Plutarch.Test.Golden (goldenEval, goldenEvalFail, goldenGroup,
+                             plutarchGolden)
 import Test.Tasty (TestTree, testGroup)
 
 tests :: TestTree

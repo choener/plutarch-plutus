@@ -3,14 +3,12 @@
 module Plutarch.Pair (PPair (..)) where
 
 import Data.Kind (Type)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Internal.Eq (PEq)
 import Plutarch.Internal.PlutusType (PlutusType, pcon, pmatch)
-import Plutarch.Internal.Semigroup (
-  PMonoid (pmempty),
-  PSemigroup (pstimes, (#<>)),
- )
+import Plutarch.Internal.Semigroup (PMonoid (pmempty),
+                                    PSemigroup (pstimes, (#<>)))
 import Plutarch.Internal.Show (PShow)
 import Plutarch.Internal.Term (S, Term)
 import Plutarch.Repr.SOP (DeriveAsSOPStruct (DeriveAsSOPStruct))

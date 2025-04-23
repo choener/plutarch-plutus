@@ -8,16 +8,10 @@ import PlutusLedgerApi.V1.Orphans.DCert ()
 import PlutusLedgerApi.V1.Orphans.Interval ()
 import PlutusLedgerApi.V1.Orphans.Tx ()
 import PlutusLedgerApi.V1.Orphans.Value qualified as Value
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  NonEmptyList (NonEmpty),
-  functionMap,
-  getNonEmpty,
-  oneof,
-  variant,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        CoArbitrary (coarbitrary), Function (function),
+                        NonEmptyList (NonEmpty), functionMap, getNonEmpty,
+                        oneof, variant)
 
 -- | @since 1.0.2
 instance Arbitrary PLA.TxInInfo where

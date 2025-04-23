@@ -4,12 +4,9 @@ module PlutusLedgerApi.V1.Orphans.Address () where
 
 import PlutusLedgerApi.V1 qualified as PLA
 import PlutusLedgerApi.V1.Orphans.Credential ()
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  functionMap,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        CoArbitrary (coarbitrary), Function (function),
+                        functionMap)
 
 -- | @since 1.0.0
 instance Arbitrary PLA.Address where

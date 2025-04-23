@@ -20,13 +20,11 @@ import PlutusLedgerApi.V1.Orphans.Interval ()
 import PlutusLedgerApi.V1.Orphans.Scripts ()
 import PlutusLedgerApi.V1.Orphans.Time ()
 import PlutusLedgerApi.V1.Orphans.Tx ()
-import PlutusLedgerApi.V1.Orphans.Value (MintValue, UTxOValue, getMintValue, getUtxoValue)
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  functionMap,
- )
+import PlutusLedgerApi.V1.Orphans.Value (MintValue, UTxOValue, getMintValue,
+                                         getUtxoValue)
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        CoArbitrary (coarbitrary), Function (function),
+                        functionMap)
 
 -- | @since 1.0.2
 instance Arbitrary PLA.ScriptContext where

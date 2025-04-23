@@ -11,21 +11,10 @@ module Plutarch.Internal.TermCont (
 
 import Data.Kind (Type)
 import Data.String (fromString)
-import Plutarch.Internal.Term (
-  Config (Tracing),
-  Dig,
-  HoistedTerm (..),
-  PType,
-  RawTerm (..),
-  S,
-  Term (Term),
-  TracingMode (DetTracing),
-  asRawTerm,
-  getTerm,
-  hashRawTerm,
-  perror,
-  pgetConfig,
- )
+import Plutarch.Internal.Term (Config (Tracing), Dig, HoistedTerm (..), PType,
+                               RawTerm (..), S, Term (Term),
+                               TracingMode (DetTracing), asRawTerm, getTerm,
+                               hashRawTerm, perror, pgetConfig)
 import Plutarch.Internal.Trace (ptraceInfo)
 
 newtype TermCont :: forall (r :: PType). S -> Type -> Type where

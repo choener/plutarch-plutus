@@ -3,18 +3,12 @@
 module PlutusLedgerApi.V1.Orphans.Scripts () where
 
 import Data.Coerce (coerce)
-import PlutusLedgerApi.Orphans.Common (
-  Blake2b244Hash (Blake2b244Hash),
-  Blake2b256Hash (Blake2b256Hash),
- )
+import PlutusLedgerApi.Orphans.Common (Blake2b244Hash (Blake2b244Hash),
+                                       Blake2b256Hash (Blake2b256Hash))
 import PlutusLedgerApi.V1 qualified as PLA
 import PlutusTx.Prelude qualified as PlutusTx
-import Test.QuickCheck (
-  Arbitrary,
-  CoArbitrary,
-  Function (function),
-  functionMap,
- )
+import Test.QuickCheck (Arbitrary, CoArbitrary, Function (function),
+                        functionMap)
 
 -- | @since 1.0.0
 deriving via PlutusTx.BuiltinData instance Arbitrary PLA.Redeemer

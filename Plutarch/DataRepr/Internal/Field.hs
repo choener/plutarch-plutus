@@ -1,5 +1,5 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes  #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Plutarch.DataRepr.Internal.Field (
@@ -25,32 +25,17 @@ module Plutarch.DataRepr.Internal.Field (
 
 import Data.Kind (Constraint, Type)
 import Data.Proxy (Proxy (Proxy))
-import GHC.TypeLits (
-  KnownNat,
-  Symbol,
- )
+import GHC.TypeLits (KnownNat, Symbol)
 import Plutarch.Builtin.Data (PAsData)
-import Plutarch.DataRepr.Internal (
-  PDataRecord,
-  PDataSum,
-  PLabeledType ((:=)),
-  pdropDataRecord,
-  pindexDataRecord,
-  punDataSum,
-  type PLabelIndex,
-  type PLookupLabel,
-  type PUnLabel,
- )
+import Plutarch.DataRepr.Internal (PDataRecord, PDataSum, PLabeledType ((:=)),
+                                   pdropDataRecord, pindexDataRecord,
+                                   punDataSum, type PLabelIndex,
+                                   type PLookupLabel, type PUnLabel)
 import Plutarch.DataRepr.Internal.FromData (PFromDataable, pmaybeFromAsData)
-import Plutarch.DataRepr.Internal.HList (
-  HRec (HCons, HNil),
-  Labeled (Labeled, unLabeled),
-  hrecField,
-  type Drop,
-  type ElemOf,
-  type IndexLabel,
-  type IndexList,
- )
+import Plutarch.DataRepr.Internal.HList (HRec (HCons, HNil),
+                                         Labeled (Labeled, unLabeled),
+                                         hrecField, type Drop, type ElemOf,
+                                         type IndexLabel, type IndexList)
 import Plutarch.Internal.IsData (PIsData, pfromData)
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PLam (plam)

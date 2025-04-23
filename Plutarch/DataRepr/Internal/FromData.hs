@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Plutarch.DataRepr.Internal.FromData (PFromDataable, pmaybeFromAsData) where

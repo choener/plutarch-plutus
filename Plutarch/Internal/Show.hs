@@ -13,83 +13,33 @@ import Data.List.NonEmpty qualified as NE
 import Data.Semigroup (sconcat)
 import Data.String (IsString (fromString))
 import Data.Text qualified as T
-import Generics.SOP (
-  All,
-  All2,
-  ConstructorName,
-  K (K),
-  NP,
-  NS,
-  Proxy (Proxy),
-  SOP (SOP),
-  constructorInfo,
-  constructorName,
-  hcmap,
-  hcollapse,
-  hindex,
-  hmap,
- )
+import Generics.SOP (All, All2, ConstructorName, K (K), NP, NS, Proxy (Proxy),
+                     SOP (SOP), constructorInfo, constructorName, hcmap,
+                     hcollapse, hindex, hmap)
 import Generics.SOP.GGP (gdatatypeInfo)
 import Plutarch.Builtin.Bool (PBool, pif, pif')
-import Plutarch.Builtin.ByteString (
-  PByte,
-  PByteString,
-  pbyteToInteger,
-  pconsBS,
-  pindexBS,
-  pintegerToByte,
-  plengthBS,
-  psliceBS,
- )
-import Plutarch.Builtin.Data (
-  PAsData,
-  PBuiltinList,
-  PBuiltinPair,
-  PData,
-  pasByteStr,
-  pasConstr,
-  pasInt,
-  pasList,
-  pasMap,
-  pchooseData,
-  pfstBuiltin,
-  psndBuiltin,
- )
+import Plutarch.Builtin.ByteString (PByte, PByteString, pbyteToInteger, pconsBS,
+                                    pindexBS, pintegerToByte, plengthBS,
+                                    psliceBS)
+import Plutarch.Builtin.Data (PAsData, PBuiltinList, PBuiltinPair, PData,
+                              pasByteStr, pasConstr, pasInt, pasList, pasMap,
+                              pchooseData, pfstBuiltin, psndBuiltin)
 import Plutarch.Builtin.Integer (PInteger)
-import Plutarch.Builtin.String (
-  PString,
-  pdecodeUtf8,
-  pencodeUtf8,
- )
+import Plutarch.Builtin.String (PString, pdecodeUtf8, pencodeUtf8)
 import Plutarch.Builtin.Unit (PUnit)
 import Plutarch.Internal.Eq (PEq ((#==)))
 import Plutarch.Internal.Fix (pfix)
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom)
 import Plutarch.Internal.IsData (PIsData, pfromData)
 import Plutarch.Internal.Lift (PlutusRepr, pconstant)
-import Plutarch.Internal.ListLike (
-  PIsListLike,
-  PListLike (pelimList),
-  pfoldr',
-  pmap,
-  precList,
- )
+import Plutarch.Internal.ListLike (PIsListLike, PListLike (pelimList), pfoldr',
+                                   pmap, precList)
 import Plutarch.Internal.Numeric (PPositive, pquot, prem)
 import Plutarch.Internal.Ord (POrd ((#<)))
 import Plutarch.Internal.PLam (PLamN (plam))
 import Plutarch.Internal.PlutusType (PlutusType, pmatch)
-import Plutarch.Internal.Term (
-  Term,
-  pdelay,
-  perror,
-  pforce,
-  phoistAcyclic,
-  plet,
-  punsafeCoerce,
-  (#),
-  (#$),
-  type (:-->),
- )
+import Plutarch.Internal.Term (Term, pdelay, perror, pforce, phoistAcyclic,
+                               plet, punsafeCoerce, type (:-->), (#$), (#))
 import Plutarch.Maybe (PMaybe)
 
 import PlutusCore qualified as PLC

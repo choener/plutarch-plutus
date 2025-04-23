@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Plutarch.Internal.Semigroup (
@@ -15,63 +15,28 @@ module Plutarch.Internal.Semigroup (
 import Data.ByteString qualified as BS
 import Data.Kind (Type)
 import Data.Text qualified as Text
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
-import Plutarch.Builtin.BLS (
-  PBuiltinBLS12_381_G1_Element,
-  PBuiltinBLS12_381_G2_Element,
-  PBuiltinBLS12_381_MlResult,
- )
-import Plutarch.Builtin.Bool (
-  PBool (PFalse, PTrue),
-  pif,
-  pif',
-  pnot,
- )
-import Plutarch.Builtin.ByteString (
-  PByteString,
-  pandBS,
-  pindexBS,
-  plengthBS,
-  porBS,
-  ppadding,
-  preplicateBS,
-  pxorBS,
- )
+import GHC.Generics (Generic)
+import Plutarch.Builtin.BLS (PBuiltinBLS12_381_G1_Element,
+                             PBuiltinBLS12_381_G2_Element,
+                             PBuiltinBLS12_381_MlResult)
+import Plutarch.Builtin.Bool (PBool (PFalse, PTrue), pif, pif', pnot)
+import Plutarch.Builtin.ByteString (PByteString, pandBS, pindexBS, plengthBS,
+                                    porBS, ppadding, preplicateBS, pxorBS)
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Builtin.String (PString)
 import Plutarch.Builtin.Unit (PUnit, punit)
 import Plutarch.Internal.Eq (PEq ((#==)))
-import Plutarch.Internal.Lift (
-  DeriveNewtypePLiftable,
-  PLiftable (AsHaskell),
-  PLifted (PLifted),
-  PlutusRepr,
- )
-import Plutarch.Internal.Numeric (
-  PNatural,
-  PPositive,
-  pbySquaringDefault,
-  pdiv,
-  pnaturalToPositiveCPS,
-  pscaleNatural,
-  pscalePositive,
-  pzero,
-  (#*),
-  (#+),
- )
+import Plutarch.Internal.Lift (DeriveNewtypePLiftable, PLiftable (AsHaskell),
+                               PLifted (PLifted), PlutusRepr)
+import Plutarch.Internal.Numeric (PNatural, PPositive, pbySquaringDefault, pdiv,
+                                  pnaturalToPositiveCPS, pscaleNatural,
+                                  pscalePositive, pzero, (#*), (#+))
 import Plutarch.Internal.Ord (POrd)
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PlutusType (PlutusType (PInner), pcon)
-import Plutarch.Internal.Term (
-  S,
-  Term,
-  plet,
-  punsafeBuiltin,
-  punsafeConstantInternal,
-  (#),
-  (#$),
- )
+import Plutarch.Internal.Term (S, Term, plet, punsafeBuiltin,
+                               punsafeConstantInternal, (#$), (#))
 import Plutarch.Repr.Newtype (DeriveNewtypePlutusType (DeriveNewtypePlutusType))
 import Plutarch.Unsafe (punsafeDowncast)
 import PlutusCore qualified as PLC

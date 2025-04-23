@@ -17,43 +17,22 @@ module Plutarch.List (
 ) where
 
 import Data.Kind (Type)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Builtin.Bool (PBool (PFalse, PTrue), pif, ptrue, (#&&))
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Internal.Eq (PEq ((#==)))
 import Plutarch.Internal.Fix (pfix)
 import Plutarch.Internal.Lift (pconstant)
-import Plutarch.Internal.ListLike (
-  PElemConstraint,
-  PIsListLike,
-  PListLike,
-  pcons,
-  pelimList,
-  pfoldl,
-  phead,
-  pnil,
-  precList,
-  ptail,
-  pzipWith',
- )
+import Plutarch.Internal.ListLike (PElemConstraint, PIsListLike, PListLike,
+                                   pcons, pelimList, pfoldl, phead, pnil,
+                                   precList, ptail, pzipWith')
 import Plutarch.Internal.Ord (POrd ((#<), (#<=)))
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.PlutusType (
-  PlutusType,
-  pcon,
-  pmatch,
- )
+import Plutarch.Internal.PlutusType (PlutusType, pcon, pmatch)
 import Plutarch.Internal.Show (PShow (pshow'), pshowList)
-import Plutarch.Internal.Term (
-  S,
-  Term,
-  perror,
-  phoistAcyclic,
-  (#),
-  (#$),
-  (:-->),
- )
+import Plutarch.Internal.Term (S, Term, perror, phoistAcyclic, (#$), (#),
+                               (:-->))
 import Plutarch.Internal.Trace (ptraceInfo)
 import Plutarch.Maybe (PMaybe (PJust, PNothing))
 import Plutarch.Pair (PPair (PPair))

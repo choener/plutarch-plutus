@@ -7,7 +7,8 @@ module Plutarch.Internal.Trace (
 
 import Data.Kind (Type)
 import Plutarch.Builtin.String (PString, ptrace', ptraceInfo)
-import Plutarch.Internal.Term (Config (Tracing), LogLevel (LogDebug), S, Term, pdelay, pforce, pgetConfig, (#))
+import Plutarch.Internal.Term (Config (Tracing), LogLevel (LogDebug), S, Term,
+                               pdelay, pforce, pgetConfig, (#))
 
 {- | Backward compatibility synonym for 'ptraceInfo'.
 

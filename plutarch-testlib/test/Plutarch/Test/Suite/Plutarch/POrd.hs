@@ -8,12 +8,11 @@ module Plutarch.Test.Suite.Plutarch.POrd (tests) where
 
 import Data.Kind (Type)
 import GHC.Records (getField)
-import Plutarch.LedgerApi.V1 (
-  PCredential (PPubKeyCredential, PScriptCredential),
-  PMaybeData,
- )
+import Plutarch.LedgerApi.V1 (PCredential (PPubKeyCredential, PScriptCredential),
+                              PMaybeData)
 import Plutarch.Prelude
-import Plutarch.Test.Golden (GoldenTestTree, goldenEval, goldenGroup, plutarchGolden)
+import Plutarch.Test.Golden (GoldenTestTree, goldenEval, goldenGroup,
+                             plutarchGolden)
 import Plutarch.Test.Laws (checkHaskellOrdEquivalent, checkPOrdLaws)
 import Plutarch.Test.SpecTypes (PTriplet, Triplet (Triplet))
 import PlutusLedgerApi.QuickCheck.Utils ()

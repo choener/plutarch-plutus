@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
@@ -11,23 +11,14 @@ module Plutarch.String (
   pdecodeUtf8,
 ) where
 
-import Plutarch.Builtin.String (
-  PString,
-  pdecodeUtf8,
-  pencodeUtf8,
- )
+import Plutarch.Builtin.String (PString, pdecodeUtf8, pencodeUtf8)
 
 import Plutarch.Builtin.Bool (PBool, (#&&), (#||))
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Internal.Numeric ()
 import Plutarch.Internal.Ord ((#<=))
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.Term (
-  S,
-  Term,
-  phoistAcyclic,
-  (:-->),
- )
+import Plutarch.Internal.Term (S, Term, phoistAcyclic, (:-->))
 
 {- | Verify if the given argument is the ASCII encoding of a hex digit. This
 includes specifically the following ASCII ranges (inclusively):

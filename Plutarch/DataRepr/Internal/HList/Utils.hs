@@ -10,13 +10,8 @@ module Plutarch.DataRepr.Internal.HList.Utils (
 ) where
 
 import Data.Kind (Type)
-import GHC.TypeLits (
-  ErrorMessage (Text, (:$$:), (:<>:)),
-  Nat,
-  Symbol,
-  TypeError,
-  type (-),
- )
+import GHC.TypeLits (ErrorMessage (Text, (:$$:), (:<>:)), Nat, Symbol,
+                     TypeError, type (-))
 
 newtype Labeled sym a = Labeled {unLabeled :: a}
 

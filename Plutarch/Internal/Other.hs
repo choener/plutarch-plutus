@@ -8,16 +8,8 @@ module Plutarch.Internal.Other (
 
 import Data.Text qualified as T
 import GHC.Stack (HasCallStack)
-import Plutarch.Internal.PlutusType (
-  PInner,
- )
-import Plutarch.Internal.Term (
-  ClosedTerm,
-  Config,
-  Term,
-  compile,
-  punsafeCoerce,
- )
+import Plutarch.Internal.PlutusType (PInner)
+import Plutarch.Internal.Term (ClosedTerm, Config, Term, compile, punsafeCoerce)
 import Plutarch.Script (Script (Script))
 import PlutusCore.Pretty (prettyPlcReadable)
 

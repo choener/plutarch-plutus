@@ -23,13 +23,14 @@ module Plutarch.Builtin.BLS (
   pbls12_381_finalVerify,
 ) where
 
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Builtin.Bool (PBool)
 import Plutarch.Builtin.ByteString (PByteString)
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Builtin.Opaque (POpaque)
-import Plutarch.Internal.Term (Term, punsafeBuiltin, punsafeConstantInternal, (:-->))
+import Plutarch.Internal.Term (Term, punsafeBuiltin, punsafeConstantInternal,
+                               (:-->))
 import PlutusCore qualified as PLC
 import PlutusCore.Crypto.BLS12_381.G1 qualified as BLS12_381.G1
 import PlutusCore.Crypto.BLS12_381.G2 qualified as BLS12_381.G2

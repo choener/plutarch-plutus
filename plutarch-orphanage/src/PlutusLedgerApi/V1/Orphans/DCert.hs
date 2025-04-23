@@ -5,16 +5,10 @@ module PlutusLedgerApi.V1.Orphans.DCert () where
 import PlutusLedgerApi.QuickCheck.Utils (fromAsWord64)
 import PlutusLedgerApi.V1 qualified as PLA
 import PlutusLedgerApi.V1.Orphans.Credential ()
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  NonNegative (NonNegative),
-  functionMap,
-  getNonNegative,
-  oneof,
-  variant,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        CoArbitrary (coarbitrary), Function (function),
+                        NonNegative (NonNegative), functionMap, getNonNegative,
+                        oneof, variant)
 
 -- | @since 1.0.0
 instance Arbitrary PLA.DCert where

@@ -1,6 +1,6 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes     #-}
+{-# LANGUAGE FlexibleInstances       #-}
+{-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
 module Plutarch.Internal.PlutusType (
@@ -33,28 +33,16 @@ module Plutarch.Internal.PlutusType (
   DeriveFakePlutusType (DeriveFakePlutusType),
 ) where
 
-import Plutarch.Builtin.BLS (
-  PBuiltinBLS12_381_G1_Element,
-  PBuiltinBLS12_381_G2_Element,
-  PBuiltinBLS12_381_MlResult,
- )
+import Plutarch.Builtin.BLS (PBuiltinBLS12_381_G1_Element,
+                             PBuiltinBLS12_381_G2_Element,
+                             PBuiltinBLS12_381_MlResult)
 import Plutarch.Builtin.Bool (PBool (PFalse, PTrue), pfalse, pif', ptrue)
-import Plutarch.Builtin.ByteString (
-  PByte,
-  PByteString,
-  PEndianness,
-  PLogicOpSemantics,
- )
-import Plutarch.Builtin.Data (
-  PAsData (PAsData),
-  PBuiltinList (PCons, PNil),
-  PBuiltinPair (PBuiltinPair),
-  PData (PData),
-  pchooseListBuiltin,
-  pconsBuiltin,
-  pheadBuiltin,
-  ptailBuiltin,
- )
+import Plutarch.Builtin.ByteString (PByte, PByteString, PEndianness,
+                                    PLogicOpSemantics)
+import Plutarch.Builtin.Data (PAsData (PAsData), PBuiltinList (PCons, PNil),
+                              PBuiltinPair (PBuiltinPair), PData (PData),
+                              pchooseListBuiltin, pconsBuiltin, pheadBuiltin,
+                              ptailBuiltin)
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Builtin.Opaque (POpaque (POpaque))
 import Plutarch.Builtin.String (PString)
@@ -62,31 +50,19 @@ import Plutarch.Builtin.Unit (PUnit (PUnit), punit)
 
 import Data.Kind (Constraint, Type)
 import Data.Proxy (Proxy (Proxy))
-import GHC.Exts (Any)
-import GHC.TypeLits (ErrorMessage (ShowType, Text, (:<>:)), TypeError)
-import Generics.SOP (
-  All2,
-  Code,
-  I (I),
-  NP (Nil, (:*)),
-  NS (Z),
-  SOP (SOP),
- )
+import Generics.SOP (All2, Code, I (I), NP (Nil, (:*)), NS (Z), SOP (SOP))
 import Generics.SOP qualified as SOP
 import Generics.SOP.Constraint (Head)
+import GHC.Exts (Any)
+import GHC.TypeLits (ErrorMessage (ShowType, Text, (:<>:)), TypeError)
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom, gpto)
-import {-# SOURCE #-} Plutarch.Internal.IsData (
-  PIsData,
-  pdata,
-  pfromData,
- )
-import {-# SOURCE #-} Plutarch.Internal.Lift (
-  PlutusRepr,
-  getPLifted,
-  unsafeHaskToUni,
- )
-import Plutarch.Internal.Quantification (PFix (PFix), PForall (PForall), PSome (PSome))
-import Plutarch.Internal.Term (PType, S, Term, pdelay, pforce, plam', plet, punsafeCoerce, (#), (:-->) (PLam))
+import {-# SOURCE #-} Plutarch.Internal.IsData (PIsData, pdata, pfromData)
+import {-# SOURCE #-} Plutarch.Internal.Lift (PlutusRepr, getPLifted,
+                                              unsafeHaskToUni)
+import Plutarch.Internal.Quantification (PFix (PFix), PForall (PForall),
+                                         PSome (PSome))
+import Plutarch.Internal.Term (PType, S, Term, pdelay, pforce, plam', plet,
+                               punsafeCoerce, (#), (:-->) (PLam))
 import Plutarch.Internal.Witness (witness)
 import PlutusCore qualified as PLC
 

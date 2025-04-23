@@ -6,15 +6,9 @@ import PlutusLedgerApi.QuickCheck.Utils (fromAsWord64)
 import PlutusLedgerApi.V1 qualified as PLA
 import PlutusLedgerApi.V1.Orphans.Crypto ()
 import PlutusLedgerApi.V1.Orphans.Scripts ()
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  NonNegative (NonNegative),
-  functionMap,
-  oneof,
-  variant,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        CoArbitrary (coarbitrary), Function (function),
+                        NonNegative (NonNegative), functionMap, oneof, variant)
 
 {- | As 'PLA.Credential' is just a wrapper around a hash with a tag, shrinking
 this type doesn't make much sense. Therefore we don't do it.

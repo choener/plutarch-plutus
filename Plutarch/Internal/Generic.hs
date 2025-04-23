@@ -1,5 +1,5 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances       #-}
+{-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
 {- Common generics-sop utilities for use in Plutarch.
@@ -16,10 +16,10 @@ module Plutarch.Internal.Generic (
 -- lol
 import Data.Constraint (Dict (Dict))
 import Data.Kind (Constraint)
-import GHC.Exts (Any)
-import GHC.Generics (Generic)
 import Generics.SOP (All2, I, SOP, Top)
 import Generics.SOP.GGP (GCode, GDatatypeInfo, GFrom, GTo, gfrom, gto)
+import GHC.Exts (Any)
+import GHC.Generics (Generic)
 import Plutarch.Internal.Term (PType, S, Term)
 import Plutarch.Internal.TypeFamily (ToPType2)
 import Unsafe.Coerce (unsafeCoerce)

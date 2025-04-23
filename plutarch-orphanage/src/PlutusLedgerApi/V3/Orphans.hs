@@ -5,9 +5,7 @@ module PlutusLedgerApi.V3.Orphans (MintValue, getMintValue) where
 import Control.Monad (guard)
 import Data.Coerce (coerce)
 import Data.Set qualified as Set
-import PlutusLedgerApi.Orphans.Common (
-  Blake2b256Hash (Blake2b256Hash),
- )
+import PlutusLedgerApi.Orphans.Common (Blake2b256Hash (Blake2b256Hash))
 import PlutusLedgerApi.V1.Orphans.Credential ()
 import PlutusLedgerApi.V1.Orphans.Interval ()
 import PlutusLedgerApi.V1.Orphans.Time ()
@@ -21,23 +19,13 @@ import PlutusTx.AssocMap qualified as AssocMap
 import PlutusTx.Builtins qualified as Builtins
 import PlutusTx.Prelude qualified as PlutusTx
 import PlutusTx.Ratio qualified as Ratio
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  Arbitrary1 (liftArbitrary, liftShrink),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  NonEmptyList (NonEmpty),
-  NonNegative (NonNegative),
-  Positive (Positive),
-  chooseInt,
-  elements,
-  functionMap,
-  getNonEmpty,
-  getNonNegative,
-  getPositive,
-  oneof,
-  variant,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        Arbitrary1 (liftArbitrary, liftShrink),
+                        CoArbitrary (coarbitrary), Function (function),
+                        NonEmptyList (NonEmpty), NonNegative (NonNegative),
+                        Positive (Positive), chooseInt, elements, functionMap,
+                        getNonEmpty, getNonNegative, getPositive, oneof,
+                        variant)
 import Test.QuickCheck.Instances.Containers ()
 
 -- | @since 1.0.1

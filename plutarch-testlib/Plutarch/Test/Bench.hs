@@ -62,59 +62,40 @@ import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Tagged (Tagged (Tagged))
 import Data.Text qualified as Text
-import GHC.Conc (TVar, atomically, forkIO, newTVarIO, readTVar, retry, writeTVar)
+import GHC.Conc (TVar, atomically, forkIO, newTVarIO, readTVar, retry,
+                 writeTVar)
 import GHC.IO.Encoding (setLocaleEncoding, utf8)
 import Plutarch.Evaluate (evalScriptUnlimited)
 import Plutarch.Internal.Term (Config (NoTracing), compile, compileOptimized)
 import Plutarch.Prelude
 import Plutarch.Script (Script (unScript))
 import PlutusCore.Evaluation.Machine.ExBudget (ExBudget (ExBudget))
-import PlutusCore.Evaluation.Machine.ExMemory (ExCPU (ExCPU), ExMemory (ExMemory))
+import PlutusCore.Evaluation.Machine.ExMemory (ExCPU (ExCPU),
+                                               ExMemory (ExMemory))
 import PlutusLedgerApi.Common (serialiseUPLC)
 import System.Exit (exitFailure, exitSuccess)
-import System.IO (
-  BufferMode (LineBuffering),
-  Handle,
-  IOMode (WriteMode),
-  hClose,
-  hPutStrLn,
-  hSetBuffering,
-  openFile,
-  stderr,
- )
+import System.IO (BufferMode (LineBuffering), Handle, IOMode (WriteMode),
+                  hClose, hPutStrLn, hSetBuffering, openFile, stderr)
 import Test.Tasty
-import Test.Tasty.Ingredients (Ingredient (TestReporter), composeReporters, tryIngredients)
+import Test.Tasty.Ingredients (Ingredient (TestReporter), composeReporters,
+                               tryIngredients)
 import Test.Tasty.Ingredients.ConsoleReporter (MinDurationToReport (MinDurationToReport))
-import Test.Tasty.Options (
-  IsOption (defaultValue, optionHelp, optionName, parseValue),
-  OptionDescription (Option),
-  OptionSet,
-  lookupOption,
-  safeRead,
-  setOption,
- )
+import Test.Tasty.Options (IsOption (defaultValue, optionHelp, optionName, parseValue),
+                           OptionDescription (Option), OptionSet, lookupOption,
+                           safeRead, setOption)
 import Test.Tasty.Patterns.Eval (asB, eval, withFields)
 import Test.Tasty.Patterns.Types (Expr (And, StringLit))
-import Test.Tasty.Providers (IsTest (run, testOptions), singleTest, testFailed, testPassed)
-import Test.Tasty.Runners (
-  Ap (Ap, getApp),
-  FailureReason (TestFailed),
-  Outcome (Failure),
-  Result (resultDescription, resultOutcome, resultShortDescription),
-  Status (Done, Executing, NotStarted),
-  StatusMap,
-  TreeFold (foldAfter, foldGroup, foldSingle),
-  consoleTestReporter,
-  foldTestTree,
-  formatMessage,
-  installSignalHandlers,
-  listingTests,
-  parseExpr,
-  parseOptions,
-  resultSuccessful,
-  testsNames,
-  trivialFold,
- )
+import Test.Tasty.Providers (IsTest (run, testOptions), singleTest, testFailed,
+                             testPassed)
+import Test.Tasty.Runners (Ap (Ap, getApp), FailureReason (TestFailed),
+                           Outcome (Failure),
+                           Result (resultDescription, resultOutcome, resultShortDescription),
+                           Status (Done, Executing, NotStarted), StatusMap,
+                           TreeFold (foldAfter, foldGroup, foldSingle),
+                           consoleTestReporter, foldTestTree, formatMessage,
+                           installSignalHandlers, listingTests, parseExpr,
+                           parseOptions, resultSuccessful, testsNames,
+                           trivialFold)
 import Text.Printf (printf)
 
 -- | @since 1.0.0

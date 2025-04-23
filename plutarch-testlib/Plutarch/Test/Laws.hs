@@ -1,6 +1,6 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE AllowAmbiguousTypes  #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE PolyKinds            #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Plutarch.Test.Laws (
@@ -24,21 +24,17 @@ import Control.Applicative ((<|>))
 import Data.Kind (Type)
 import Plutarch.LedgerApi.V1 qualified as V1
 import Plutarch.Prelude
-import Plutarch.Test.QuickCheck (checkHaskellEquivalent, checkHaskellEquivalent2)
-import Plutarch.Test.Utils (instanceOfType, precompileTerm, prettyEquals, prettyShow, typeName')
+import Plutarch.Test.QuickCheck (checkHaskellEquivalent,
+                                 checkHaskellEquivalent2)
+import Plutarch.Test.Utils (instanceOfType, precompileTerm, prettyEquals,
+                            prettyShow, typeName')
 import Plutarch.Unsafe (punsafeCoerce)
 import PlutusLedgerApi.Common qualified as Plutus
 import PlutusLedgerApi.V1.Orphans ()
 import Prettyprinter (Pretty (pretty))
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  Arbitrary1 (liftArbitrary, liftShrink),
-  Property,
-  forAllShrinkShow,
-  oneof,
-  (=/=),
-  (===),
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        Arbitrary1 (liftArbitrary, liftShrink), Property,
+                        forAllShrinkShow, oneof, (=/=), (===))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
 import Type.Reflection (Typeable, typeRep)

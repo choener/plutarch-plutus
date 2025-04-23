@@ -1,67 +1,34 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Plutarch.Internal.Eq (
   PEq (..),
 ) where
 
-import Plutarch.Builtin.BLS (
-  PBuiltinBLS12_381_G1_Element,
-  PBuiltinBLS12_381_G2_Element,
- )
+import Plutarch.Builtin.BLS (PBuiltinBLS12_381_G1_Element,
+                             PBuiltinBLS12_381_G2_Element)
 import Plutarch.Builtin.Bool (PBool (PFalse, PTrue), pif, pif', pnot, (#&&))
-import Plutarch.Builtin.ByteString (
-  PByte,
-  PByteString,
-  PEndianness,
-  PLogicOpSemantics,
- )
-import Plutarch.Builtin.Data (
-  PAsData,
-  PBuiltinList,
-  PBuiltinPair,
-  PData,
-  pfstBuiltin,
-  psndBuiltin,
- )
+import Plutarch.Builtin.ByteString (PByte, PByteString, PEndianness,
+                                    PLogicOpSemantics)
+import Plutarch.Builtin.Data (PAsData, PBuiltinList, PBuiltinPair, PData,
+                              pfstBuiltin, psndBuiltin)
 import Plutarch.Builtin.Integer (PInteger, peqInteger)
 import Plutarch.Builtin.String (PString)
 import Plutarch.Builtin.Unit (PUnit)
 
 import Data.Kind (Type)
 import Data.List.NonEmpty (nonEmpty)
-import Generics.SOP (
-  All,
-  All2,
-  HCollapse (hcollapse),
-  K (K),
-  NP,
-  Proxy (Proxy),
-  SOP (SOP),
-  ccompare_NS,
-  hcliftA2,
- )
+import Generics.SOP (All, All2, HCollapse (hcollapse), K (K), NP, Proxy (Proxy),
+                     SOP (SOP), ccompare_NS, hcliftA2)
 import Plutarch.Internal.Fix (pfix)
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom)
 import {-# SOURCE #-} Plutarch.Internal.IsData (PIsData, pdata)
 import Plutarch.Internal.Lift (PLiftable (PlutusRepr), pconstant)
 import Plutarch.Internal.ListLike (PListLike (pelimList))
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.PlutusType (
-  PlutusType,
-  pcon,
-  pmatch,
- )
-import Plutarch.Internal.Term (
-  S,
-  Term,
-  phoistAcyclic,
-  plet,
-  punsafeBuiltin,
-  (#),
-  (#$),
-  (:-->),
- )
+import Plutarch.Internal.PlutusType (PlutusType, pcon, pmatch)
+import Plutarch.Internal.Term (S, Term, phoistAcyclic, plet, punsafeBuiltin,
+                               (#$), (#), (:-->))
 import PlutusCore qualified as PLC
 
 class PEq t where

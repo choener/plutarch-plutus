@@ -3,7 +3,8 @@
 
   nixConfig = {
     allow-import-from-derivation = "true";
-    bash-prompt = "\\[\\e[0m\\][\\[\\e[0;2m\\]nix \\[\\e[0;1m\\]plutarch \\[\\e[0;93m\\]\\w\\[\\e[0m\\]]\\[\\e[0m\\]$ \\[\\e[0m\\]";
+    bash-prompt =
+      "\\[\\e[0m\\][\\[\\e[0;2m\\]nix \\[\\e[0;1m\\]plutarch \\[\\e[0;93m\\]\\w\\[\\e[0m\\]]\\[\\e[0m\\]$ \\[\\e[0m\\]";
     cores = "1";
     max-jobs = "auto";
     auto-optimise-store = "true";
@@ -31,27 +32,24 @@
 
   outputs = inputs@{ flake-parts, nixpkgs, haskell-nix, iohk-nix, CHaP, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [
-        ./nix/pre-commit.nix
-        ./nix/hercules-ci.nix
-      ];
+      imports = [ ./nix/pre-commit.nix ./nix/hercules-ci.nix ];
       debug = true;
-      systems = [ "x86_64-linux" "aarch64-darwin" "x86_64-darwin" "aarch64-linux" ];
+      systems =
+        [ "x86_64-linux" "aarch64-darwin" "x86_64-darwin" "aarch64-linux" ];
       hercules-ci.github-pages.branch = "staging";
 
       perSystem = { config, system, lib, self', ... }:
         let
-          pkgs =
-            import haskell-nix.inputs.nixpkgs {
-              inherit system;
-              overlays = [
-                haskell-nix.overlay
-                iohk-nix.overlays.crypto
-                iohk-nix.overlays.haskell-nix-crypto
-                inputs.herbage.overlays.default
-              ];
-              inherit (haskell-nix) config;
-            };
+          pkgs = import haskell-nix.inputs.nixpkgs {
+            inherit system;
+            overlays = [
+              haskell-nix.overlay
+              iohk-nix.overlays.crypto
+              iohk-nix.overlays.haskell-nix-crypto
+              inputs.herbage.overlays.default
+            ];
+            inherit (haskell-nix) config;
+          };
 
           herbage = inputs.herbage.lib { inherit pkgs; };
 
@@ -59,19 +57,14 @@
             src = ./.;
             compiler-nix-name = "ghc966";
             index-state = "2025-02-08T01:45:27Z";
-            inputMap = {
-              "https://chap.intersectmbo.org/" = CHaP;
-            };
+            inputMap = { "https://chap.intersectmbo.org/" = CHaP; };
             shell = {
               withHoogle = true;
               withHaddock = true;
               exactDeps = false;
               # TODO(peter-mlabs): Use `apply-refact` for repo wide refactoring `find -name '*.hs' -not -path './dist-*/*' -exec hlint -j --refactor --refactor-options="--inplace" {} +``
               shellHook = config.pre-commit.installationScript;
-              nativeBuildInputs = with pkgs; [
-                mdbook
-                hackage-repo-tool
-              ];
+              nativeBuildInputs = with pkgs; [ mdbook hackage-repo-tool ];
               tools = {
                 cabal = { };
                 haskell-language-server = { };
@@ -84,10 +77,10 @@
             };
           };
           flake = project.flake { };
-        in
-        {
+        in {
           inherit (flake) devShells;
-          hercules-ci.github-pages.settings.contents = self'.packages.combined-docs;
+          hercules-ci.github-pages.settings.contents =
+            self'.packages.combined-docs;
           packages = flake.packages // {
             plutarch-docs = pkgs.stdenv.mkDerivation {
               name = "pluatrch-docs";
@@ -99,12 +92,8 @@
             };
             haddock = (import ./nix/combine-haddock.nix) { inherit pkgs lib; } {
               cabalProject = project;
-              targetPackages = [
-                "plutarch"
-                "plutus-core"
-                "plutus-tx"
-                "plutus-ledger-api"
-              ];
+              targetPackages =
+                [ "plutarch" "plutus-core" "plutus-tx" "plutus-ledger-api" ];
               prologue = ''
                 = Plutarch Documentation
                 Documentation of Plutarch /and/ Documentation of Plutus libraries.
@@ -115,13 +104,10 @@
             # store secrets in Hercules CI, I'd have to fix this.
             # However, since deployment of hackage sets are fully automatized using Hercules CI,
             # This should remain secure as long as Plutonomicon/Plutarch repository is secure.
-            hackage =
-              herbage.genHackage
-                ./keys
-                (import ./nix/hackage.nix { inherit pkgs; });
+            hackage = herbage.genHackage ./keys
+              (import ./nix/hackage.nix { inherit pkgs; });
 
-            combined-docs = pkgs.runCommand "combined-docs"
-              { } ''
+            combined-docs = pkgs.runCommand "combined-docs" { } ''
               mkdir -p $out/haddock
               cp ${self'.packages.haddock}/share/doc/* $out/haddock -r
               cp ${self'.packages.plutarch-docs}/* $out -r

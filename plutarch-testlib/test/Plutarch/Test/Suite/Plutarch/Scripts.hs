@@ -9,18 +9,11 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding qualified as Encoding
 import Plutarch.Builtin.Crypto (pverifyEd25519Signature)
-import Plutarch.Internal.Term (
-  Config (Tracing),
-  LogLevel (LogInfo),
-  TracingMode (DetTracing),
-  compile,
- )
-import Plutarch.LedgerApi.V3 (
-  PPubKeyHash,
-  PScriptContext (pscriptContext'txInfo),
-  PTxInfo (ptxInfo'signatories),
-  scriptHash,
- )
+import Plutarch.Internal.Term (Config (Tracing), LogLevel (LogInfo),
+                               TracingMode (DetTracing), compile)
+import Plutarch.LedgerApi.V3 (PPubKeyHash,
+                              PScriptContext (pscriptContext'txInfo),
+                              PTxInfo (ptxInfo'signatories), scriptHash)
 import Plutarch.Prelude
 import Plutarch.Script (Script)
 import Plutarch.Test.Golden (goldenEval, goldenGroup, plutarchGolden)

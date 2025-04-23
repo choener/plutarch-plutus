@@ -14,23 +14,11 @@ import PlutusLedgerApi.V1.Orphans.Value ()
 import PlutusLedgerApi.V1.Value qualified as Value
 import PlutusTx.AssocMap qualified as AssocMap
 import PlutusTx.Prelude qualified as PlutusTx
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  Arbitrary1 (liftArbitrary, liftShrink),
-  CoArbitrary,
-  Function (function),
-  Gen,
-  NonZero (NonZero),
-  chooseBoundedIntegral,
-  chooseInt,
-  functionMap,
-  getNonEmpty,
-  getNonZero,
-  resize,
-  scale,
-  sized,
-  vectorOf,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        Arbitrary1 (liftArbitrary, liftShrink), CoArbitrary,
+                        Function (function), Gen, NonZero (NonZero),
+                        chooseBoundedIntegral, chooseInt, functionMap,
+                        getNonEmpty, getNonZero, resize, scale, sized, vectorOf)
 
 {- | A 'PLA.Value' that contains only non-zero amounts but does not have zero Ada entry
 

@@ -2,7 +2,8 @@ module Plutarch.Test.Suite.Plutarch.Uplc (tests) where
 
 import Plutarch.Internal.Term (punsafeConstantInternal)
 import Plutarch.Prelude
-import Plutarch.Test.Golden (goldenEval, goldenEvalFail, goldenGroup, plutarchGolden)
+import Plutarch.Test.Golden (goldenEval, goldenEvalFail, goldenGroup,
+                             plutarchGolden)
 import Plutarch.Unsafe (punsafeBuiltin)
 import PlutusCore qualified as PLC
 import Test.Tasty (TestTree, testGroup)

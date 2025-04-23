@@ -5,5 +5,4 @@ let
     url = "https://github.com/${owner}/${repo}/archive/${rev}.tar.gz";
     sha256 = narHash;
   };
-in
-import flake-compat { src = ./.; }
+in import flake-compat { src = ./.; }

@@ -6,8 +6,8 @@ module Plutarch.LedgerApi.V1.Crypto (
 ) where
 
 import Data.ByteString (ByteString)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Prelude
 import PlutusLedgerApi.V1 qualified as Plutus
 import PlutusTx.Builtins.Internal qualified as PlutusTx

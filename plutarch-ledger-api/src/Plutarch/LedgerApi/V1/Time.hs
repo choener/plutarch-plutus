@@ -10,8 +10,8 @@ module Plutarch.LedgerApi.V1.Time (
   unPPosixTime,
 ) where
 
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Prelude
 import PlutusLedgerApi.V1 qualified as Plutus
 

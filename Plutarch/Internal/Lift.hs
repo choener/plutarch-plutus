@@ -1,6 +1,6 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes     #-}
+{-# LANGUAGE FlexibleInstances       #-}
+{-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 -- Because of the weird way the PlutusType derivation mechanisms work, we lose
 -- the PlutusType constraint. Kind of annoying, but we can't convince GHC
@@ -47,38 +47,26 @@ import Data.Kind (Type)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Word (Word8)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
-import Plutarch.Builtin.BLS (
-  PBuiltinBLS12_381_G1_Element,
-  PBuiltinBLS12_381_G2_Element,
-  PBuiltinBLS12_381_MlResult,
- )
+import GHC.Generics (Generic)
+import Plutarch.Builtin.BLS (PBuiltinBLS12_381_G1_Element,
+                             PBuiltinBLS12_381_G2_Element,
+                             PBuiltinBLS12_381_MlResult)
 import Plutarch.Builtin.Bool (PBool)
 import Plutarch.Builtin.ByteString (PByte, PByteString)
-import Plutarch.Builtin.Data (
-  PAsData,
-  PBuiltinList,
-  PBuiltinPair,
-  PData,
- )
+import Plutarch.Builtin.Data (PAsData, PBuiltinList, PBuiltinPair, PData)
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Builtin.Opaque (POpaque, popaque)
 import Plutarch.Builtin.String (PString)
 import Plutarch.Builtin.Unit (PUnit)
 import Plutarch.Internal.Evaluate (EvalError, evalScriptHuge)
 import {-# SOURCE #-} Plutarch.Internal.IsData (PIsData)
-import Plutarch.Internal.PlutusType (DeriveFakePlutusType (DeriveFakePlutusType), PlutusType (PInner))
+import Plutarch.Internal.PlutusType (DeriveFakePlutusType (DeriveFakePlutusType),
+                                     PlutusType (PInner))
 import Plutarch.Internal.Subtype (PSubtype)
-import Plutarch.Internal.Term (
-  Config (Tracing),
-  LogLevel (LogInfo),
-  S,
-  Term,
-  TracingMode (DoTracing),
-  compile,
-  punsafeConstantInternal,
- )
+import Plutarch.Internal.Term (Config (Tracing), LogLevel (LogInfo), S, Term,
+                               TracingMode (DoTracing), compile,
+                               punsafeConstantInternal)
 import Plutarch.Script (Script (Script))
 import Plutarch.Unsafe (punsafeCoerce)
 import PlutusCore qualified as PLC

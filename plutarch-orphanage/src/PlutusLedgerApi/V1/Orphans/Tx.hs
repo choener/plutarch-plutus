@@ -3,20 +3,13 @@
 module PlutusLedgerApi.V1.Orphans.Tx () where
 
 import Data.Coerce (coerce)
-import PlutusLedgerApi.Orphans.Common (
-  Blake2b256Hash (Blake2b256Hash),
- )
+import PlutusLedgerApi.Orphans.Common (Blake2b256Hash (Blake2b256Hash))
 import PlutusLedgerApi.V1 qualified as PLA
 import PlutusLedgerApi.V1.Orphans.Address ()
 import PlutusLedgerApi.V1.Orphans.Value qualified as Value
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  NonNegative (NonNegative),
-  functionMap,
-  getNonNegative,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        CoArbitrary (coarbitrary), Function (function),
+                        NonNegative (NonNegative), functionMap, getNonNegative)
 
 {- | BLAKE2b-256 hash (32 bytes) of a transaction ID.
 

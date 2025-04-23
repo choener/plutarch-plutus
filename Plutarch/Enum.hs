@@ -13,14 +13,7 @@ import Plutarch.Internal.Numeric (PPositive, pone, (#+))
 import Plutarch.Internal.Ord (POrd)
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.Term (
-  S,
-  Term,
-  phoistAcyclic,
-  (#),
-  (#$),
-  (:-->),
- )
+import Plutarch.Internal.Term (S, Term, phoistAcyclic, (#$), (#), (:-->))
 
 {- | A notion of \'next\' value. More formally, instances of this type class are
 discrete linear orders with no maximal element.

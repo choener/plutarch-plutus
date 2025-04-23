@@ -10,11 +10,8 @@ module Plutarch.Pretty.Internal.TermUtils (
   pattern IfThenElseLikeAST,
 ) where
 
-import UntypedPlutusCore (
-  DeBruijn (DeBruijn),
-  Index,
-  Term (Apply, Delay, Force, LamAbs, Var),
- )
+import UntypedPlutusCore (DeBruijn (DeBruijn), Index,
+                          Term (Apply, Delay, Force, LamAbs, Var))
 
 unwrapLamAbs :: Index -> Term name uni fun ann -> (Index, Term name uni fun ann)
 unwrapLamAbs d (LamAbs _ _ t) = unwrapLamAbs (d + 1) t

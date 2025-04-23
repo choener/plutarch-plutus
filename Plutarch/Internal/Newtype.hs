@@ -1,17 +1,13 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Plutarch.Internal.Newtype (PlutusTypeNewtype) where
 
 import Generics.SOP qualified as SOP
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom, gpto)
-import Plutarch.Internal.PlutusType (
-  DerivedPInner,
-  PlutusTypeStrat,
-  PlutusTypeStratConstraint,
-  derivedPCon,
-  derivedPMatch,
- )
+import Plutarch.Internal.PlutusType (DerivedPInner, PlutusTypeStrat,
+                                     PlutusTypeStratConstraint, derivedPCon,
+                                     derivedPMatch)
 import Plutarch.Internal.Term (PType)
 
 data PlutusTypeNewtype

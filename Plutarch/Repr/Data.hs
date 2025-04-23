@@ -1,5 +1,5 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes  #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Plutarch.Repr.Data (
@@ -12,72 +12,30 @@ module Plutarch.Repr.Data (
 import Data.Kind (Type)
 import Data.Maybe (catMaybes)
 import Data.Proxy (Proxy (Proxy))
-import GHC.Exts (Any)
-import Generics.SOP (
-  All,
-  All2,
-  Code,
-  K (K),
-  NP (Nil, (:*)),
-  NS (Z),
-  SListI,
-  SListI2,
-  SOP (SOP),
- )
+import Generics.SOP (All, All2, Code, K (K), NP (Nil, (:*)), NS (Z), SListI,
+                     SListI2, SOP (SOP))
 import Generics.SOP qualified as SOP
 import Generics.SOP.Constraint (Head)
-import Plutarch.Builtin.Data (
-  PBuiltinList,
-  PData,
-  pasConstr,
-  pconsBuiltin,
-  pconstrBuiltin,
-  pfstBuiltin,
-  psndBuiltin,
- )
+import GHC.Exts (Any)
+import Plutarch.Builtin.Data (PBuiltinList, PData, pasConstr, pconsBuiltin,
+                              pconstrBuiltin, pfstBuiltin, psndBuiltin)
 import Plutarch.Internal.Eq (PEq, (#==))
 import Plutarch.Internal.IsData (PInnermostIsData, PIsData)
 import Plutarch.Internal.Lift
 import Plutarch.Internal.ListLike (phead, ptail)
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.PlutusType (
-  PContravariant',
-  PContravariant'',
-  PCovariant',
-  PCovariant'',
-  PInner,
-  PVariant',
-  PVariant'',
-  PlutusType,
-  pcon,
-  pcon',
-  pmatch,
-  pmatch',
- )
-import Plutarch.Internal.Term (
-  InternalConfig (..),
-  S,
-  Term,
-  pgetInternalConfig,
-  phoistAcyclic,
-  plet,
-  pplaceholder,
-  punsafeCoerce,
-  pwithInternalConfig,
-  (#),
-  (#$),
- )
-import Plutarch.Repr.Internal (
-  PRec (PRec, unPRec),
-  PStruct (PStruct, unPStruct),
-  RecAsHaskell,
-  RecTypePrettyError,
-  StructSameRepr,
-  UnTermRec,
-  UnTermStruct,
-  groupHandlers,
- )
+import Plutarch.Internal.PlutusType (PContravariant', PContravariant'',
+                                     PCovariant', PCovariant'', PInner,
+                                     PVariant', PVariant'', PlutusType, pcon,
+                                     pcon', pmatch, pmatch')
+import Plutarch.Internal.Term (InternalConfig (..), S, Term, pgetInternalConfig,
+                               phoistAcyclic, plet, pplaceholder, punsafeCoerce,
+                               pwithInternalConfig, (#$), (#))
+import Plutarch.Repr.Internal (PRec (PRec, unPRec),
+                               PStruct (PStruct, unPStruct), RecAsHaskell,
+                               RecTypePrettyError, StructSameRepr, UnTermRec,
+                               UnTermStruct, groupHandlers)
 import Plutarch.TermCont (pfindPlaceholder, pletC, unTermCont)
 import PlutusLedgerApi.V3 qualified as PLA
 

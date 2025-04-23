@@ -6,14 +6,9 @@ import PlutusLedgerApi.V1.Orphans.Address ()
 import PlutusLedgerApi.V1.Orphans.Scripts ()
 import PlutusLedgerApi.V1.Orphans.Value qualified as Value
 import PlutusLedgerApi.V2 qualified as PLA
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  functionMap,
-  oneof,
-  variant,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        CoArbitrary (coarbitrary), Function (function),
+                        functionMap, oneof, variant)
 
 -- | @since 1.0.0
 instance Arbitrary PLA.OutputDatum where

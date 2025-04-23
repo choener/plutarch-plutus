@@ -23,42 +23,18 @@ module Plutarch.Maybe (
 ) where
 
 import Data.Kind (Type)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Builtin.Bool (PBool)
 import Plutarch.Builtin.String (PString, ptraceInfo)
 import Plutarch.Internal.Eq (PEq)
-import Plutarch.Internal.Lift (
-  PLiftable (
-    AsHaskell,
-    PlutusRepr,
-    haskToRepr,
-    plutToRepr,
-    reprToHask,
-    reprToPlut
-  ),
-  PLiftedClosed,
-  getPLiftedClosed,
-  mkPLifted,
-  mkPLiftedClosed,
-  pconstant,
-  pliftedFromClosed,
-  pliftedToClosed,
- )
+import Plutarch.Internal.Lift (PLiftable (AsHaskell, PlutusRepr, haskToRepr, plutToRepr, reprToHask, reprToPlut),
+                               PLiftedClosed, getPLiftedClosed, mkPLifted,
+                               mkPLiftedClosed, pconstant, pliftedFromClosed,
+                               pliftedToClosed)
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.PlutusType (
-  PlutusType,
-  pcon,
-  pmatch,
- )
-import Plutarch.Internal.Term (
-  S,
-  Term,
-  perror,
-  phoistAcyclic,
-  (#),
-  (:-->),
- )
+import Plutarch.Internal.PlutusType (PlutusType, pcon, pmatch)
+import Plutarch.Internal.Term (S, Term, perror, phoistAcyclic, (#), (:-->))
 import Plutarch.Repr.SOP (DeriveAsSOPStruct (DeriveAsSOPStruct))
 
 -- | @since 1.10.0

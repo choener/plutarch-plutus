@@ -5,18 +5,13 @@ module Plutarch.Internal.Evaluate (uplcVersion, evalScript, evalScriptHuge, eval
 import Data.Text (Text)
 import Plutarch.Script (Script (Script))
 import PlutusCore qualified as PLC
-import PlutusCore.Evaluation.Machine.ExBudget (
-  ExBudget (ExBudget),
-  ExRestrictingBudget (ExRestrictingBudget),
-  minusExBudget,
- )
+import PlutusCore.Evaluation.Machine.ExBudget (ExBudget (ExBudget),
+                                               ExRestrictingBudget (ExRestrictingBudget),
+                                               minusExBudget)
 import PlutusCore.Evaluation.Machine.ExBudgetingDefaults (defaultCekParametersForTesting)
-import PlutusCore.Evaluation.Machine.ExMemory (ExCPU (ExCPU), ExMemory (ExMemory))
-import UntypedPlutusCore (
-  Program (Program),
-  Term,
-  Version (Version),
- )
+import PlutusCore.Evaluation.Machine.ExMemory (ExCPU (ExCPU),
+                                               ExMemory (ExMemory))
+import UntypedPlutusCore (Program (Program), Term, Version (Version))
 import UntypedPlutusCore qualified as UPLC
 import UntypedPlutusCore.Evaluation.Machine.Cek qualified as Cek
 

@@ -1,5 +1,5 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances       #-}
+{-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
 module Plutarch.DataRepr.Internal (
@@ -28,103 +28,49 @@ import Data.List (groupBy, maximumBy, sortOn)
 import Data.Proxy (Proxy (Proxy))
 import Data.SOP.NP (cana_NP)
 import Data.String (fromString)
+import Generics.SOP (All, Compose, K (K), NP (Nil, (:*)), NS (S, Z), SListI,
+                     SOP (SOP), Top, case_SList, hcollapse, hindex, hmap,
+                     para_SList)
 import GHC.Generics (Generic)
-import GHC.TypeLits (
-  KnownNat,
-  KnownSymbol,
-  Nat,
-  Symbol,
-  natVal,
-  symbolVal,
-  type (+),
- )
-import Generics.SOP (
-  All,
-  Compose,
-  K (K),
-  NP (Nil, (:*)),
-  NS (S, Z),
-  SListI,
-  SOP (SOP),
-  Top,
-  case_SList,
-  hcollapse,
-  hindex,
-  hmap,
-  para_SList,
- )
+import GHC.TypeLits (KnownNat, KnownSymbol, Nat, Symbol, natVal, symbolVal,
+                     type (+))
 import Plutarch.Builtin.Bool (PBool, pif)
-import Plutarch.Builtin.Data (
-  PAsData,
-  PBuiltinList,
-  PData,
-  pasConstr,
-  pchooseListBuiltin,
-  pconstrBuiltin,
-  pfstBuiltin,
-  psndBuiltin,
- )
+import Plutarch.Builtin.Data (PAsData, PBuiltinList, PData, pasConstr,
+                              pchooseListBuiltin, pconstrBuiltin, pfstBuiltin,
+                              psndBuiltin)
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Builtin.Opaque (POpaque, popaque)
 import Plutarch.Builtin.String (PString)
 import Plutarch.Builtin.Unit (PUnit (PUnit))
-import Plutarch.DataRepr.Internal.HList (
-  HRec (HCons, HNil),
-  HRecGeneric (HRecGeneric),
-  Labeled (Labeled),
-  type Drop,
-  type IndexList,
- )
+import Plutarch.DataRepr.Internal.HList (HRec (HCons, HNil),
+                                         HRecGeneric (HRecGeneric),
+                                         Labeled (Labeled), type Drop,
+                                         type IndexList)
 import Plutarch.Internal.Eq (PEq ((#==)))
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom, gpto)
-import Plutarch.Internal.IsData (PIsData, pdata, pdataImpl, pforgetData, pfromData, pfromDataImpl)
+import Plutarch.Internal.IsData (PIsData, pdata, pdataImpl, pforgetData,
+                                 pfromData, pfromDataImpl)
 import Plutarch.Internal.Lift (pconstant)
-import Plutarch.Internal.ListLike (PListLike (pnil), pcons, pdrop, phead, ptail, ptryIndex)
+import Plutarch.Internal.ListLike (PListLike (pnil), pcons, pdrop, phead, ptail,
+                                   ptryIndex)
 import Plutarch.Internal.Newtype (PlutusTypeNewtype)
 import Plutarch.Internal.Ord (POrd (pmax, pmin, (#<), (#<=)))
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.PlutusType (
-  DerivePlutusType (DPTStrat),
-  DerivedPInner,
-  PlutusType (PInner, pcon', pmatch'),
-  PlutusTypeStrat,
-  PlutusTypeStratConstraint,
-  derivedPCon,
-  derivedPMatch,
-  pcon,
-  pmatch,
- )
+import Plutarch.Internal.PlutusType (DerivePlutusType (DPTStrat), DerivedPInner,
+                                     PlutusType (PInner, pcon', pmatch'),
+                                     PlutusTypeStrat, PlutusTypeStratConstraint,
+                                     derivedPCon, derivedPMatch, pcon, pmatch)
 import Plutarch.Internal.Show (PShow (pshow'))
-import Plutarch.Internal.Term (
-  Dig,
-  Term,
-  pdelay,
-  perror,
-  pforce,
-  phoistAcyclic,
-  plet,
-  (#),
-  (#$),
-  (:-->),
- )
+import Plutarch.Internal.Term (Dig, Term, pdelay, perror, pforce, phoistAcyclic,
+                               plet, (#$), (#), (:-->))
 import Plutarch.Internal.Term qualified as P
-import Plutarch.Internal.TermCont (
-  TermCont,
-  hashOpenTerm,
-  runTermCont,
-  tcont,
-  unTermCont,
- )
-import Plutarch.Internal.TryFrom (
-  PSubtype',
-  PSubtypeRelation (PNoSubtypeRelation, PSubtypeRelation),
-  PTryFrom,
-  PTryFromExcess,
-  ptryFrom,
-  ptryFrom',
-  pupcast,
- )
+import Plutarch.Internal.TermCont (TermCont, hashOpenTerm, runTermCont, tcont,
+                                   unTermCont)
+import Plutarch.Internal.TryFrom (PSubtype',
+                                  PSubtypeRelation (PNoSubtypeRelation, PSubtypeRelation),
+                                  PTryFrom, PTryFromExcess, ptryFrom, ptryFrom',
+                                  pupcast)
 import Plutarch.Reducible (NoReduce, Reduce)
 import Plutarch.Trace (ptraceInfoError)
 import Plutarch.Unsafe (punsafeCoerce)

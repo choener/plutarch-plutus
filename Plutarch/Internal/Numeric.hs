@@ -34,83 +34,41 @@ module Plutarch.Internal.Numeric (
 
 import Data.Coerce (coerce)
 import Data.Kind (Type)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Numeric.Natural (Natural)
-import Plutarch.Builtin.BLS (
-  PBuiltinBLS12_381_G1_Element,
-  PBuiltinBLS12_381_G2_Element,
-  PBuiltinBLS12_381_MlResult,
-  pbls12_381_G1_add,
-  pbls12_381_G1_compressed_zero,
-  pbls12_381_G1_neg,
-  pbls12_381_G1_scalarMul,
-  pbls12_381_G1_uncompress,
-  pbls12_381_G2_add,
-  pbls12_381_G2_compressed_zero,
-  pbls12_381_G2_neg,
-  pbls12_381_G2_scalarMul,
-  pbls12_381_G2_uncompress,
-  pbls12_381_mulMlResult,
- )
+import Plutarch.Builtin.BLS (PBuiltinBLS12_381_G1_Element,
+                             PBuiltinBLS12_381_G2_Element,
+                             PBuiltinBLS12_381_MlResult, pbls12_381_G1_add,
+                             pbls12_381_G1_compressed_zero, pbls12_381_G1_neg,
+                             pbls12_381_G1_scalarMul, pbls12_381_G1_uncompress,
+                             pbls12_381_G2_add, pbls12_381_G2_compressed_zero,
+                             pbls12_381_G2_neg, pbls12_381_G2_scalarMul,
+                             pbls12_381_G2_uncompress, pbls12_381_mulMlResult)
 import Plutarch.Builtin.Bool (pcond, pif)
-import Plutarch.Builtin.Integer (
-  PInteger,
-  paddInteger,
-  pconstantInteger,
-  pmultiplyInteger,
-  pquotientInteger,
-  premainderInteger,
-  psubtractInteger,
- )
+import Plutarch.Builtin.Integer (PInteger, paddInteger, pconstantInteger,
+                                 pmultiplyInteger, pquotientInteger,
+                                 premainderInteger, psubtractInteger)
 import Plutarch.Internal.Eq (PEq ((#==)))
 import Plutarch.Internal.Fix (pfix)
 import Plutarch.Internal.IsData (PIsData)
-import Plutarch.Internal.Lift (
-  DeriveNewtypePLiftable,
-  LiftError (OtherLiftError),
-  PLiftable (
-    AsHaskell,
-    PlutusRepr,
-    haskToRepr,
-    plutToRepr,
-    reprToHask,
-    reprToPlut
-  ),
-  PLifted (PLifted),
-  punsafeCoercePLifted,
- )
+import Plutarch.Internal.Lift (DeriveNewtypePLiftable,
+                               LiftError (OtherLiftError),
+                               PLiftable (AsHaskell, PlutusRepr, haskToRepr, plutToRepr, reprToHask, reprToPlut),
+                               PLifted (PLifted), punsafeCoercePLifted)
 import Plutarch.Internal.Ord (POrd ((#<=)))
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.PlutusType (
-  DeriveNewtypePlutusType (DeriveNewtypePlutusType),
-  PlutusType (PInner),
-  pcon,
- )
-import Plutarch.Internal.Term (
-  S,
-  Term,
-  perror,
-  phoistAcyclic,
-  plet,
-  punsafeBuiltin,
-  punsafeCoerce,
-  (#),
-  (#$),
-  (:-->),
- )
+import Plutarch.Internal.PlutusType (DeriveNewtypePlutusType (DeriveNewtypePlutusType),
+                                     PlutusType (PInner), pcon)
+import Plutarch.Internal.Term (S, Term, perror, phoistAcyclic, plet,
+                               punsafeBuiltin, punsafeCoerce, (#$), (#), (:-->))
 import Plutarch.Internal.Trace (ptraceInfo)
 import Plutarch.Maybe (PMaybe (PJust, PNothing))
 import Plutarch.Unsafe (punsafeDowncast)
 import PlutusCore qualified as PLC
 import Prettyprinter (Pretty)
-import Test.QuickCheck (
-  Arbitrary,
-  CoArbitrary,
-  Function,
-  functionMap,
- )
+import Test.QuickCheck (Arbitrary, CoArbitrary, Function, functionMap)
 import Test.QuickCheck qualified as QuickCheck
 
 -- | @since 1.10.0

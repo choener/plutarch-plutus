@@ -5,23 +5,14 @@ module Plutarch.Builtin.String (PString (PString), pdecodeUtf8, pencodeUtf8, ptr
 import Data.Kind (Type)
 import Data.String (IsString, fromString)
 import Data.Text qualified as Text
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Builtin.ByteString (PByteString)
 import Plutarch.Builtin.Opaque (POpaque)
-import Plutarch.Internal.Term (
-  Config (NoTracing, Tracing),
-  S,
-  Term,
-  pdelay,
-  pforce,
-  pgetConfig,
-  phoistAcyclic,
-  punsafeBuiltin,
-  punsafeConstantInternal,
-  (#),
-  type (:-->),
- )
+import Plutarch.Internal.Term (Config (NoTracing, Tracing), S, Term, pdelay,
+                               pforce, pgetConfig, phoistAcyclic,
+                               punsafeBuiltin, punsafeConstantInternal,
+                               type (:-->), (#))
 import PlutusCore qualified as PLC
 
 -- | Plutus 'BuiltinString' values

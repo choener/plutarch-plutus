@@ -34,8 +34,8 @@ module Plutarch.LedgerApi.Interval (
 ) where
 
 import Data.Kind (Type)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Prelude hiding (psingleton, pto)
 import Plutarch.Repr.Data
 import PlutusLedgerApi.V3 qualified as Plutus

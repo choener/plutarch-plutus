@@ -3,22 +3,15 @@
 module Plutarch.Repr.Derive (DerivePLiftableAsRepr (DerivePLiftableAsRepr)) where
 
 import Data.Kind (Type)
-import GHC.Exts (Any)
-import GHC.Generics (Generic)
 import Generics.SOP (Code, SOP)
 import Generics.SOP qualified as SOP
-import Plutarch.Internal.Lift (
-  AsHaskell,
-  LiftError,
-  PLiftable,
-  PlutusRepr,
-  haskToRepr,
-  plutToRepr,
-  punsafeCoercePLifted,
-  reprToHask,
-  reprToPlut,
- )
-import Plutarch.Internal.PlutusType (DeriveFakePlutusType (DeriveFakePlutusType), PInner, PlutusType)
+import GHC.Exts (Any)
+import GHC.Generics (Generic)
+import Plutarch.Internal.Lift (AsHaskell, LiftError, PLiftable, PlutusRepr,
+                               haskToRepr, plutToRepr, punsafeCoercePLifted,
+                               reprToHask, reprToPlut)
+import Plutarch.Internal.PlutusType (DeriveFakePlutusType (DeriveFakePlutusType),
+                                     PInner, PlutusType)
 import Plutarch.Internal.Term (S)
 import Plutarch.Repr.Internal (StructAsHaskell, UnTermStruct')
 

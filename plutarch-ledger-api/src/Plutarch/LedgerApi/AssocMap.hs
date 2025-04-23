@@ -1,6 +1,6 @@
-{-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE BlockArguments        #-}
 {-# LANGUAGE QuantifiedConstraints #-}
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RankNTypes            #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 {- | This module is designed to be imported qualified, as many of its
@@ -81,16 +81,12 @@ import Data.Bifunctor (bimap)
 import Data.Foldable (foldl')
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Internal.Lift (LiftError (CouldNotDecodeData))
 import Plutarch.Internal.Term (punsafeBuiltin)
 import Plutarch.Internal.Witness (witness)
-import Plutarch.LedgerApi.Utils (
-  PSBool (PSFalse, PSTrue),
-  psfalse,
-  pstrue,
- )
+import Plutarch.LedgerApi.Utils (PSBool (PSFalse, PSTrue), psfalse, pstrue)
 import Plutarch.Prelude hiding (pall, pany, pmap, pnull, psingleton, pzipWith)
 import Plutarch.Prelude qualified as PPrelude
 import Plutarch.Unsafe (punsafeCoerce, punsafeDowncast)

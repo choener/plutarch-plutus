@@ -85,6 +85,10 @@ import PlutusCore qualified as PLC
 import PlutusCore.DeBruijn (DeBruijn (DeBruijn), Index (Index))
 import Prettyprinter (Pretty (pretty), (<+>))
 import UntypedPlutusCore qualified as UPLC
+import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef')
+import qualified Data.Map.Strict as CacheMap
+import System.IO.Unsafe (unsafePerformIO)
+import Debug.Trace (traceM)
 
 {- $hoisted
  __Explanation for hoisted terms:__
@@ -686,17 +690,44 @@ punsafeConstantInternal c = Term \_ ->
 asClosedRawTerm :: ClosedTerm a -> TermMonad TermResult
 asClosedRawTerm t = asRawTerm t 0
 
+-- | Cache for 'ClosedTerm's that have been seen by 'phoistAcyclic'.
+
+cache_phoistAcyclic :: IORef (CacheMap.Map Dig ())
+cache_phoistAcyclic = unsafePerformIO . newIORef $ CacheMap.empty
+{-# NoInline cache_phoistAcyclic #-}
+
 -- FIXME: Give proper error message when mutually recursive.
 phoistAcyclic :: HasCallStack => ClosedTerm a -> Term s a
 phoistAcyclic t = Term \_ ->
   asRawTerm t 0 >>= \case
     -- Built-ins are smaller than variable references
     t'@(getTerm -> RBuiltin _) -> pure t'
-    t' -> case evalScript . Script . UPLC.Program () uplcVersion $ compile' t' of
-      (Right _, _, _) ->
-        let hoisted = HoistedTerm (hashRawTerm . getTerm $ t') (getTerm t')
-         in pure $ TermResult (RHoisted hoisted) (hoisted : getDeps t')
-      (Left e, _, _) -> pthrow' $ "Hoisted term errs! " <> fromString (show e)
+    -- NOTE: (choener) Check if the hash of this closed term is known to the
+    -- phoist acyclic cache. If so, we don't need to check again, otherwise run
+    -- the script-compile check.
+    t' -> unsafePerformIO $ do
+            cache <- do
+              cmap <- readIORef cache_phoistAcyclic
+              if CacheMap.size cmap > 10000
+                then do
+                  traceM "cache_phoistAcyclic too large, resetting!"
+                  pure CacheMap.empty
+                else pure cmap
+            let hsh = hashRawTerm . getTerm $ t'
+                evl = evalScript . Script . UPLC.Program () uplcVersion $ compile' t'
+                hoisted = HoistedTerm hsh (getTerm t')
+                termRes = TermResult (RHoisted hoisted) (hoisted : getDeps t')
+            case CacheMap.lookup hsh cache of
+              -- pre-checked
+              Just () -> pure . pure $ termRes
+              Nothing -> case evl of
+                  -- new, but checks out
+                  (Right _, _, _) -> do
+                    atomicModifyIORef' cache_phoistAcyclic (const (M.insert hsh () cache, ()))
+                    pure . pure $ termRes
+                  -- new, and errors out
+                  (Left e, _, _) -> pure . pthrow' $ "Hoisted term errs! " <> fromString (show e)
+{-# NoInline phoistAcyclic #-}
 
 -- Couldn't find a definition for this in plutus-core
 subst :: Word64 -> (Word64 -> UTerm) -> UTerm -> UTerm

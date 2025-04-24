@@ -1,6 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes  #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 
 module Plutarch.Repr.Data (
   PDataStruct (PDataStruct, unPDataStruct),
@@ -9,6 +10,8 @@ module Plutarch.Repr.Data (
   DeriveAsDataStruct (DeriveAsDataStruct, unDeriveAsDataStruct),
 ) where
 
+import Control.Monad (zipWithM)
+import Data.IntSet qualified as IntSet
 import Data.Kind (Type)
 import Data.Maybe (catMaybes)
 import Data.Proxy (Proxy (Proxy))
@@ -32,6 +35,7 @@ import Plutarch.Internal.PlutusType (PContravariant', PContravariant'',
 import Plutarch.Internal.Term (InternalConfig (..), S, Term, pgetInternalConfig,
                                phoistAcyclic, plet, pplaceholder, punsafeCoerce,
                                pwithInternalConfig, (#$), (#))
+import Plutarch.Internal.TermCont (pfindPlaceholderSet, pfindPlaceholders)
 import Plutarch.Repr.Internal (PRec (PRec, unPRec),
                                PStruct (PStruct, unPStruct), RecAsHaskell,
                                RecTypePrettyError, StructSameRepr, UnTermRec,
@@ -251,9 +255,26 @@ pmatchDataRec (punsafeCoerce -> x) f = pgetInternalConfig $ \cfg -> unTermCont $
 
     placeholderApplied = pwithInternalConfig (InternalConfig False) $ f (fst placeholder)
 
+  -- NOTE: (choener) The pmatch optimization removes binds that are not being
+  -- used. Running this on large scripts is *very* costly. For Djed, easily x10
+  -- for a few, large scripts, which then is doubly bad, because large scripts
+  -- are already costly to compile.
+  -- PERF: (choener) It seems that only pfindPlaceholder is costly, since the
+  -- non-optimized call is cheap in relation to the optimized one.
+  -- TODO: (choener) Determine the savings of this operation.
+  -- TODO: (choener) maybe pfindPlaceholder is indeed costly. Lets try finding all cases at once!H
   usedFields <-
     if internalConfig'dataRecPMatchOptimization cfg
-      then
+      then do
+        -- PERF: Maybe replace the Integer used here with Int throughout? Bangify?
+        let idxs = [0 .. (fromIntegral $ snd placeholder)]
+        fmap fromIntegral . IntSet.toList <$> pfindPlaceholderSet idxs placeholderApplied
+        {-
+        let idxs = [0 .. (snd placeholder)]
+        founds <- pfindPlaceholders idxs placeholderApplied
+        catMaybes <$> zipWithM (\idx found -> pure $ if found then Just idx else Nothing) idxs founds
+        -}
+        {-
         catMaybes
           <$> traverse
             ( \idx -> do
@@ -261,6 +282,7 @@ pmatchDataRec (punsafeCoerce -> x) f = pgetInternalConfig $ \cfg -> unTermCont $
                 pure $ if found then Just idx else Nothing
             )
             [0 .. (snd placeholder)]
+            -}
       else pure [0 .. (snd placeholder)]
 
   let

@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-unused-foralls #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 
 module Plutarch.Internal.TermCont (
   hashOpenTerm,
@@ -7,9 +8,14 @@ module Plutarch.Internal.TermCont (
   unTermCont,
   tcont,
   pfindPlaceholder,
+  pfindPlaceholders,
+  pfindPlaceholderSet,
 ) where
 
+import Data.IntSet (IntSet)
+import Data.IntSet qualified as IntSet
 import Data.Kind (Type)
+import Data.List (foldl', transpose, (\\))
 import Data.String (fromString)
 import Plutarch.Internal.Term (Config (Tracing), Dig, HoistedTerm (..), PType,
                                RawTerm (..), S, Term (Term),
@@ -83,3 +89,59 @@ pfindPlaceholder idx x = TermCont $ \f -> Term $ \i -> do
     findPlaceholder RError = False
 
   asRawTerm (f . findPlaceholder . getTerm $ y) i
+
+-- | Tries to find all idxs in one go, otherwise 'pfindPlaceholder'.
+
+pfindPlaceholders :: [Integer] -> Term s a -> TermCont s [Bool]
+pfindPlaceholders idxs x = TermCont $ \f -> Term $ \i -> do
+  y <- asRawTerm x i
+  let
+    l = length idxs
+    conv :: [RawTerm] -> [Bool]
+    -- TODO: (choener) Consider recursively dropping idxs that have been found, and splicing them
+    -- back in. Or just returning only those idxs that have been found?
+    conv = map or . transpose . map findPlaceholders
+    findPlaceholders (RLamAbs _ x) = findPlaceholders x
+    findPlaceholders (RApply x xs) = conv (x:xs)
+    findPlaceholders (RForce x)= findPlaceholders x
+    findPlaceholders (RDelay x)= findPlaceholders x
+    findPlaceholders (RHoisted (HoistedTerm _ x)) = findPlaceholders x
+    findPlaceholders (RPlaceHolder idx') = map (idx'==) idxs
+    findPlaceholders (RConstr _ xs) = conv xs
+    findPlaceholders (RCase x xs) = conv (x:xs)
+    findPlaceholders (RVar _) = replicate l False
+    findPlaceholders (RConstant _) = replicate l False
+    findPlaceholders (RBuiltin _) = replicate l False
+    findPlaceholders (RCompiled _) = replicate l False
+    findPlaceholders RError = replicate l False
+  asRawTerm (f . findPlaceholders . getTerm $ y) i
+
+-- | Tries to find all idxs in one go, otherwise 'pfindPlaceholder'.
+--
+-- This function is not faster than 'pfindPlaceholders', but more clean, I'd say.
+
+pfindPlaceholderSet :: IntSet -> Term s a -> TermCont s IntSet
+pfindPlaceholderSet idxs x = TermCont $ \f -> Term $ \i -> do
+  y <- asRawTerm x i
+  let
+    go :: (IntSet,IntSet) -> RawTerm -> (IntSet,IntSet)
+    go (found,cands) rawTerm =
+      let herefound = findPlaceholders cands rawTerm
+          nextcands = cands IntSet.\\ herefound
+      in  (found `IntSet.union` herefound, nextcands)
+    rungo js xs = fst $ foldl' go ([],js) xs
+    findPlaceholders js (RLamAbs _ x) = findPlaceholders js x
+    findPlaceholders js (RApply x xs) = rungo js (x:xs)
+    findPlaceholders js (RForce x)= findPlaceholders js x
+    findPlaceholders js (RDelay x)= findPlaceholders js x
+    findPlaceholders js (RHoisted (HoistedTerm _ x)) = findPlaceholders js x
+    findPlaceholders js (RPlaceHolder (fromIntegral -> idx')) = IntSet.filter (idx'==) js
+    findPlaceholders js (RConstr _ xs) = rungo js xs
+    findPlaceholders js (RCase x xs) = rungo js (x:xs)
+    findPlaceholders  _ (RVar _) = []
+    findPlaceholders  _ (RConstant _) = []
+    findPlaceholders  _ (RBuiltin _) = []
+    findPlaceholders  _ (RCompiled _) = []
+    findPlaceholders  _ RError = []
+  asRawTerm (f . findPlaceholders idxs . getTerm $ y) i
+

@@ -1,5 +1,8 @@
 {-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE ViewPatterns #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 module Plutarch.Internal.Term (
   -- | \$hoisted
@@ -88,7 +91,13 @@ import UntypedPlutusCore qualified as UPLC
 import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef')
 import qualified Data.Map.Strict as CacheMap
 import System.IO.Unsafe (unsafePerformIO)
-import Debug.Trace (traceM)
+import Debug.Trace (traceM, traceShow)
+import Data.ByteString.Builder (Builder)
+import Data.Int (Int8)
+import qualified Data.ByteString.Builder as Builder
+import qualified Data.ByteString as ByteString
+import qualified Data.ByteString.Lazy as BSL
+import GHC.Conc (pseq)
 
 {- $hoisted
  __Explanation for hoisted terms:__
@@ -170,6 +179,26 @@ data TermResult = TermResult
   { getTerm :: RawTerm
   , getDeps :: [HoistedTerm]
   }
+
+-- | Count the total number of terms in a RawTerm. Mostly for performance evaluations.
+
+countTerms :: RawTerm -> Integer
+countTerms = {-# SCC "countTerms" #-} go
+  where
+    go (RVar x) = 1
+    go (RLamAbs n x) = 1 + go x
+    go (RApply x y) = 1 + go x + sum (map go y)
+    go (RForce x) = 1 + go x
+    go (RDelay x) = 1 + go x
+    go (RConstant x) = 1
+    go (RBuiltin x) = 1
+    go RError = 1
+    go (RHoisted (HoistedTerm _ term)) = 1 + go term
+    go (RCompiled code) = 1
+    go (RPlaceHolder x) = 1
+    go (RConstr x y) = 1 + sum (map go y)
+    go (RCase x y) = 1 + go x + sum (map go y)
+{-# NoInline countTerms #-}
 
 mapTerm :: (RawTerm -> RawTerm) -> TermResult -> TermResult
 mapTerm f (TermResult t d) = TermResult (f t) d
@@ -698,7 +727,7 @@ cache_phoistAcyclic = unsafePerformIO . newIORef $ CacheMap.empty
 
 -- FIXME: Give proper error message when mutually recursive.
 phoistAcyclic :: HasCallStack => ClosedTerm a -> Term s a
-phoistAcyclic t = Term \_ ->
+phoistAcyclic t = {-# SCC "phoistAcyclic" #-} Term \_ ->
   asRawTerm t 0 >>= \case
     -- Built-ins are smaller than variable references
     t'@(getTerm -> RBuiltin _) -> pure t'
@@ -707,7 +736,8 @@ phoistAcyclic t = Term \_ ->
     -- the script-compile check.
     t' -> unsafePerformIO $ do
             cache <- do
-              cmap <- readIORef cache_phoistAcyclic
+              let deps = foldl' (\() (HoistedTerm h t) -> seq h ()) () $ getDeps t'
+              cmap <- pseq deps $ readIORef cache_phoistAcyclic
               if CacheMap.size cmap > 10000
                 then do
                   traceM "cache_phoistAcyclic too large, resetting!"
@@ -800,7 +830,7 @@ smallEnoughToInline = \case
 
 -- The logic is mostly for hoisting
 compile' :: TermResult -> UTerm
-compile' t =
+compile' t = {-# SCC "compile'" #-}
   let t' = getTerm t
       deps = getDeps t
 
@@ -845,7 +875,7 @@ compile' t =
           (\b (lvl, def) -> UPLC.Apply () (UPLC.LamAbs () (DeBruijn . Index $ 0) b) (rawTermToUPLC map' lvl def))
           body
           defs
-   in wrapped
+   in wrapped -- traceShow (t',countTerms t') wrapped
 
 -- | Compile a (closed) Plutus Term to a usable script
 compile :: Config -> ClosedTerm a -> Either Text Script

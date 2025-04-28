@@ -98,6 +98,10 @@ import qualified Data.ByteString.Builder as Builder
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as BSL
 import GHC.Conc (pseq)
+import Control.Parallel.Strategies qualified as Par
+import Control.DeepSeq qualified as DeepSeq
+import Data.Hashable qualified as H
+import Data.HashMap.Strict qualified as HM
 
 {- $hoisted
  __Explanation for hoisted terms:__
@@ -114,10 +118,22 @@ import GHC.Conc (pseq)
  though the name is relative to the current level.
 -}
 
-type Dig = Digest Blake2b_160
+data Dig = Dig Int (Digest Blake2b_160)
+  deriving stock (Show)
+
+instance Eq Dig where
+  Dig lh ld == Dig rh rd = {-# SCC "Eq/Dig" #-} lh == rh && ({-# SCC "Eq/digest" #-} ld == rd)
+
+instance Ord Dig where
+  compare = {-# SCC "Ord/Dig" #-} go
+    where
+      Dig lh ld `go` Dig rh rd
+        | lh < rh = LT
+        | lh > rh = GT
+        | otherwise = {-# SCC "Ord/digest" #-} compare ld rd
 
 data HoistedTerm = HoistedTerm Dig RawTerm
-  deriving stock (Show)
+  deriving stock (Eq,Show)
 
 type UTerm = UPLC.Term UPLC.DeBruijn UPLC.DefaultUni UPLC.DefaultFun ()
 
@@ -135,23 +151,42 @@ data RawTerm
   | RPlaceHolder Integer
   | RConstr Word64 [RawTerm]
   | RCase RawTerm [RawTerm]
-  deriving stock (Show)
+  deriving stock (Eq,Show)
+
+instance H.Hashable RawTerm where
+  hashWithSalt = H.defaultHashWithSalt
+  hash = {-# SCC "Hashable" #-} \case
+    RVar x -> H.hash (0 :: Int, fromIntegral x :: Int)
+    RLamAbs n x -> H.hash (1 :: Int, n, x)
+    RApply x y -> H.hash (2 :: Int, x:y)
+    RForce x -> H.hash (3 :: Int, x)
+    RDelay x -> H.hash (4 :: Int, x)
+    RConstant x -> H.hash (5 :: Int, x)
+    RBuiltin x -> H.hash (6 :: Int, x)
+    RError -> 7 :: Int
+    RHoisted (HoistedTerm (Dig h _digest) _) -> H.hash (8 :: Int, h)
+    RCompiled code -> H.hash (9 :: Int, code)
+    RPlaceHolder x -> H.hash (10 :: Int, x)
+    RConstr x y -> H.hash (11 :: Int, x, y)
+    RCase x y -> H.hash (12 :: Int, x, y)
 
 addHashIndex :: forall alg. HashAlgorithm alg => Integer -> Context alg -> Context alg
 addHashIndex i = flip hashUpdate ((fromString $ show i) :: BS.ByteString)
 
 hashUTerm :: forall alg. HashAlgorithm alg => UTerm -> Context alg -> Context alg
-hashUTerm (UPLC.Var _ name) = addHashIndex 0 . flip hashUpdate (F.flat name)
-hashUTerm (UPLC.LamAbs _ name uterm) = addHashIndex 1 . flip hashUpdate (F.flat name) . hashUTerm uterm
-hashUTerm (UPLC.Apply _ uterm1 uterm2) = addHashIndex 2 . hashUTerm uterm1 . hashUTerm uterm2
-hashUTerm (UPLC.Force _ uterm) = addHashIndex 3 . hashUTerm uterm
-hashUTerm (UPLC.Delay _ uterm) = addHashIndex 4 . hashUTerm uterm
-hashUTerm (UPLC.Constant _ val) = addHashIndex 5 . flip hashUpdate (F.flat val)
-hashUTerm (UPLC.Builtin _ fun) = addHashIndex 6 . flip hashUpdate (F.flat fun)
-hashUTerm (UPLC.Error _) = addHashIndex 7
-hashUTerm (UPLC.Constr _ idx uterms) =
-  addHashIndex 8 . addHashIndex (fromIntegral idx) . foldl1 (.) (hashUTerm <$> uterms)
-hashUTerm (UPLC.Case _ uterm uterms) = addHashIndex 9 . hashUTerm uterm . foldl1 (.) (hashUTerm <$> uterms)
+hashUTerm = {-# SCC "hashUTerm" #-} go
+  where
+    go (UPLC.Var _ name) = addHashIndex 0 . flip hashUpdate (F.flat name)
+    go (UPLC.LamAbs _ name uterm) = addHashIndex 1 . flip hashUpdate (F.flat name) . hashUTerm uterm
+    go (UPLC.Apply _ uterm1 uterm2) = addHashIndex 2 . hashUTerm uterm1 . hashUTerm uterm2
+    go (UPLC.Force _ uterm) = addHashIndex 3 . hashUTerm uterm
+    go (UPLC.Delay _ uterm) = addHashIndex 4 . hashUTerm uterm
+    go (UPLC.Constant _ val) = addHashIndex 5 . flip hashUpdate (F.flat val)
+    go (UPLC.Builtin _ fun) = addHashIndex 6 . flip hashUpdate (F.flat fun)
+    go (UPLC.Error _) = addHashIndex 7
+    go (UPLC.Constr _ idx uterms) =
+      addHashIndex 8 . addHashIndex (fromIntegral idx) . foldl1 (.) (hashUTerm <$> uterms)
+    go (UPLC.Case _ uterm uterms) = addHashIndex 9 . hashUTerm uterm . foldl1 (.) (hashUTerm <$> uterms)
 
 hashRawTerm' :: forall alg. HashAlgorithm alg => RawTerm -> Context alg -> Context alg
 hashRawTerm' (RVar x) = addHashIndex 0 . flip hashUpdate (F.flat (fromIntegral x :: Integer))
@@ -164,7 +199,7 @@ hashRawTerm' (RDelay x) = addHashIndex 4 . hashRawTerm' x
 hashRawTerm' (RConstant x) = addHashIndex 5 . flip hashUpdate (F.flat x)
 hashRawTerm' (RBuiltin x) = addHashIndex 6 . flip hashUpdate (F.flat x)
 hashRawTerm' RError = addHashIndex 7
-hashRawTerm' (RHoisted (HoistedTerm hash _)) = addHashIndex 8 . flip hashUpdate hash
+hashRawTerm' (RHoisted (HoistedTerm (Dig h hash) _)) = addHashIndex 8 . flip hashUpdate hash
 hashRawTerm' (RCompiled code) = addHashIndex 9 . flip hashUpdate (hashUTerm @alg code hashInit)
 hashRawTerm' (RPlaceHolder x) = addHashIndex 10 . addHashIndex x
 hashRawTerm' (RConstr x y) =
@@ -173,7 +208,7 @@ hashRawTerm' (RCase x y) =
   addHashIndex 12 . hashRawTerm' x . flip (foldl' $ flip hashRawTerm') y
 
 hashRawTerm :: RawTerm -> Dig
-hashRawTerm t = hashFinalize . hashRawTerm' t $ hashInit
+hashRawTerm t = Dig (H.hash t) (hashFinalize . hashRawTerm' t $ hashInit)
 
 data TermResult = TermResult
   { getTerm :: RawTerm
@@ -757,6 +792,19 @@ phoistAcyclic t = {-# SCC "phoistAcyclic" #-} Term \_ ->
                     pure . pure $ termRes
                   -- new, and errors out
                   (Left e, _, _) -> pure . pthrow' $ "Hoisted term errs! " <> fromString (show e)
+
+{-
+phoistAcyclic t = Term \_ ->
+  asRawTerm t 0 >>= \case
+    -- Built-ins are smaller than variable references
+    t'@(getTerm -> RBuiltin _) -> pure t'
+    t' -> case evalScript . Script . UPLC.Program () uplcVersion $ compile' t' of
+      (Right _, _, _) ->
+        let hoisted = HoistedTerm (hashRawTerm . getTerm $ t') (getTerm t')
+         in pure $ TermResult (RHoisted hoisted) (hoisted : getDeps t')
+      (Left e, _, _) -> pthrow' $ "Hoisted term errs! " <> fromString (show e)
+-}
+
 {-# NoInline phoistAcyclic #-}
 
 -- Couldn't find a definition for this in plutus-core
@@ -842,7 +890,7 @@ compile' t = {-# SCC "compile'" #-}
         HoistedTerm ->
         (M.Map Dig Word64, [(Word64, RawTerm)], Word64) ->
         (M.Map Dig Word64, [(Word64, RawTerm)], Word64)
-      g (HoistedTerm hash term) (m, defs, n) = case M.alterF (f n) hash m of
+      g (HoistedTerm hash term) (m, defs, n) = {-# SCC "compile'g" #-} case M.alterF (f n) hash m of
         (True, m) -> (m, (n, term) : defs, n + 1)
         (False, m) -> (m, defs, n)
 
@@ -850,7 +898,7 @@ compile' t = {-# SCC "compile'" #-}
       hoistedTermRaw (HoistedTerm _ t) = t
 
       toInline :: S.Set Dig
-      toInline =
+      toInline = {-# SCC "compile'toInline" #-}
         S.fromList
           . fmap (\(HoistedTerm hash _) -> hash)
           . (head <$>)
@@ -862,15 +910,16 @@ compile' t = {-# SCC "compile'" #-}
       -- map: term -> de Bruijn level
       -- defs: the terms, level 0 is last
       -- n: # of terms
-      (m, defs, n) = foldr g (M.empty, [], 0) $ filter (\(HoistedTerm hash _) -> not $ S.member hash toInline) deps
+      (m, defs, n) = {-# SCC "compile'foldr" #-}
+        foldr g (M.empty, [], 0) $ filter (\(HoistedTerm hash _) -> not $ S.member hash toInline) deps
 
-      map' (HoistedTerm hash term) l = case M.lookup hash m of
+      map' (HoistedTerm hash term) l = {-# SCC "compile'map'" #-} case M.lookup hash m of
         Just l' -> UPLC.Var () . DeBruijn . Index $ l - l'
         Nothing -> rawTermToUPLC map' l term
 
-      body = rawTermToUPLC map' n t'
+      body = {-# SCC "compile'body" #-} rawTermToUPLC map' n t'
 
-      wrapped =
+      wrapped = {-# SCC "compile'wrapped" #-}
         foldl'
           (\b (lvl, def) -> UPLC.Apply () (UPLC.LamAbs () (DeBruijn . Index $ 0) b) (rawTermToUPLC map' lvl def))
           body

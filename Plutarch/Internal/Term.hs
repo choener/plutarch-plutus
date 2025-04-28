@@ -3,6 +3,7 @@
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# OPTIONS_GHC -Wno-unused-matches #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 module Plutarch.Internal.Term (
   -- | \$hoisted
@@ -70,7 +71,7 @@ import Data.Aeson (
 import Data.ByteString qualified as BS
 import Data.Default (def)
 import Data.Kind (Type)
-import Data.List (foldl', groupBy, sortOn)
+import Data.List (foldl', groupBy, sortOn, sort, group)
 import Data.Map.Lazy qualified as M
 import Data.Monoid (Last (Last))
 import Data.Set qualified as S
@@ -102,6 +103,7 @@ import Control.Parallel.Strategies qualified as Par
 import Control.DeepSeq qualified as DeepSeq
 import Data.Hashable qualified as H
 import Data.HashMap.Strict qualified as HM
+import Data.HashSet qualified as HS
 
 {- $hoisted
  __Explanation for hoisted terms:__
@@ -118,9 +120,10 @@ import Data.HashMap.Strict qualified as HM
  though the name is relative to the current level.
 -}
 
-data Dig = Dig Int (Digest Blake2b_160)
-  deriving stock (Show)
+newtype Dig = Dig Int -- (Digest Blake2b_160)
+  deriving stock (Show,Eq,Ord)
 
+{-
 instance Eq Dig where
   Dig lh ld == Dig rh rd = {-# SCC "Eq/Dig" #-} lh == rh && ({-# SCC "Eq/digest" #-} ld == rd)
 
@@ -131,9 +134,14 @@ instance Ord Dig where
         | lh < rh = LT
         | lh > rh = GT
         | otherwise = {-# SCC "Ord/digest" #-} compare ld rd
+-}
 
 data HoistedTerm = HoistedTerm Dig RawTerm
   deriving stock (Eq,Show)
+
+instance H.Hashable HoistedTerm where
+  hashWithSalt = H.defaultHashWithSalt
+  hash (HoistedTerm (Dig h) _) = h
 
 type UTerm = UPLC.Term UPLC.DeBruijn UPLC.DefaultUni UPLC.DefaultFun ()
 
@@ -164,7 +172,7 @@ instance H.Hashable RawTerm where
     RConstant x -> H.hash (5 :: Int, x)
     RBuiltin x -> H.hash (6 :: Int, x)
     RError -> 7 :: Int
-    RHoisted (HoistedTerm (Dig h _digest) _) -> H.hash (8 :: Int, h)
+    RHoisted (HoistedTerm (Dig h) _) -> H.hash (8 :: Int, h)
     RCompiled code -> H.hash (9 :: Int, code)
     RPlaceHolder x -> H.hash (10 :: Int, x)
     RConstr x y -> H.hash (11 :: Int, x, y)
@@ -188,6 +196,7 @@ hashUTerm = {-# SCC "hashUTerm" #-} go
       addHashIndex 8 . addHashIndex (fromIntegral idx) . foldl1 (.) (hashUTerm <$> uterms)
     go (UPLC.Case _ uterm uterms) = addHashIndex 9 . hashUTerm uterm . foldl1 (.) (hashUTerm <$> uterms)
 
+{-
 hashRawTerm' :: forall alg. HashAlgorithm alg => RawTerm -> Context alg -> Context alg
 hashRawTerm' (RVar x) = addHashIndex 0 . flip hashUpdate (F.flat (fromIntegral x :: Integer))
 hashRawTerm' (RLamAbs n x) =
@@ -206,9 +215,10 @@ hashRawTerm' (RConstr x y) =
   addHashIndex 11 . flip hashUpdate (F.flat (fromIntegral x :: Integer)) . flip (foldl' $ flip hashRawTerm') y
 hashRawTerm' (RCase x y) =
   addHashIndex 12 . hashRawTerm' x . flip (foldl' $ flip hashRawTerm') y
+  -}
 
 hashRawTerm :: RawTerm -> Dig
-hashRawTerm t = Dig (H.hash t) (hashFinalize . hashRawTerm' t $ hashInit)
+hashRawTerm t = Dig (H.hash t) -- (hashFinalize . hashRawTerm' t $ hashInit)
 
 data TermResult = TermResult
   { getTerm :: RawTerm
@@ -762,6 +772,8 @@ cache_phoistAcyclic = unsafePerformIO . newIORef $ CacheMap.empty
 
 -- FIXME: Give proper error message when mutually recursive.
 phoistAcyclic :: HasCallStack => ClosedTerm a -> Term s a
+-- TODO: Re-enable callstack tracing later on
+{-
 phoistAcyclic t = {-# SCC "phoistAcyclic" #-} Term \_ ->
   asRawTerm t 0 >>= \case
     -- Built-ins are smaller than variable references
@@ -792,18 +804,14 @@ phoistAcyclic t = {-# SCC "phoistAcyclic" #-} Term \_ ->
                     pure . pure $ termRes
                   -- new, and errors out
                   (Left e, _, _) -> pure . pthrow' $ "Hoisted term errs! " <> fromString (show e)
+-}
 
-{-
-phoistAcyclic t = Term \_ ->
+phoistAcyclic t = {-# SCC "phoistAcyclic" #-} Term \_ ->
   asRawTerm t 0 >>= \case
     -- Built-ins are smaller than variable references
     t'@(getTerm -> RBuiltin _) -> pure t'
-    t' -> case evalScript . Script . UPLC.Program () uplcVersion $ compile' t' of
-      (Right _, _, _) ->
-        let hoisted = HoistedTerm (hashRawTerm . getTerm $ t') (getTerm t')
-         in pure $ TermResult (RHoisted hoisted) (hoisted : getDeps t')
-      (Left e, _, _) -> pthrow' $ "Hoisted term errs! " <> fromString (show e)
--}
+    t' -> let hoisted = HoistedTerm (hashRawTerm . getTerm $ t') (getTerm t')
+          in pure $ TermResult (RHoisted hoisted) (hoisted : getDeps t')
 
 {-# NoInline phoistAcyclic #-}
 
@@ -882,10 +890,13 @@ compile' t = {-# SCC "compile'" #-}
   let t' = getTerm t
       deps = getDeps t
 
+      {-
       f :: Word64 -> Maybe Word64 -> (Bool, Maybe Word64)
       f n Nothing = (True, Just n)
       f _ (Just n) = (False, Just n)
+      -}
 
+      {-
       g ::
         HoistedTerm ->
         (M.Map Dig Word64, [(Word64, RawTerm)], Word64) ->
@@ -893,27 +904,36 @@ compile' t = {-# SCC "compile'" #-}
       g (HoistedTerm hash term) (m, defs, n) = {-# SCC "compile'g" #-} case M.alterF (f n) hash m of
         (True, m) -> (m, (n, term) : defs, n + 1)
         (False, m) -> (m, defs, n)
+      -}
 
+      gg :: HoistedTerm ->
+          (HM.HashMap HoistedTerm Word64, [(Word64, RawTerm)], Word64) ->
+          (HM.HashMap HoistedTerm Word64, [(Word64, RawTerm)], Word64)
+      gg hoistedTerm@(HoistedTerm _ term) (m, defs, n) = {-# SCC "compile'gg" #-} case HM.lookup hoistedTerm m of
+        Nothing -> (m, (n, term) : defs, n+1)
+        Just w64 -> (m, defs, n)
+
+      {-
       hoistedTermRaw :: HoistedTerm -> RawTerm
       hoistedTermRaw (HoistedTerm _ t) = t
+      -}
 
-      toInline :: S.Set Dig
+      toInline :: HM.HashMap HoistedTerm Int
       toInline = {-# SCC "compile'toInline" #-}
-        S.fromList
-          . fmap (\(HoistedTerm hash _) -> hash)
-          . (head <$>)
-          . filter (\terms -> length terms == 1 || smallEnoughToInline (hoistedTermRaw $ head terms))
-          . groupBy (\(HoistedTerm x _) (HoistedTerm y _) -> x == y)
-          . sortOn (\(HoistedTerm hash _) -> hash)
-          $ deps
+        -- keep only count "1"s or small enough to inline ones
+        HM.filterWithKey (\(HoistedTerm _ term) count -> count == 1 || smallEnoughToInline term)
+        -- count how often a hoisted term occurs
+        $ HM.fromListWith (+) . map (,1) $ deps
+
 
       -- map: term -> de Bruijn level
       -- defs: the terms, level 0 is last
       -- n: # of terms
-      (m, defs, n) = {-# SCC "compile'foldr" #-}
-        foldr g (M.empty, [], 0) $ filter (\(HoistedTerm hash _) -> not $ S.member hash toInline) deps
+      (m :: HM.HashMap HoistedTerm Word64, defs, n) = {-# SCC "compile'foldr" #-}
+        foldr gg (HM.empty, [], 0) $ filter (\hoistedTerm -> not $ HM.member hoistedTerm toInline) deps
 
-      map' (HoistedTerm hash term) l = {-# SCC "compile'map'" #-} case M.lookup hash m of
+      -- map' :: HoistedTerm -> Word64 -> _
+      map' hoistedTerm@(HoistedTerm hash term) l = {-# SCC "compile'map'" #-} case HM.lookup hoistedTerm m of
         Just l' -> UPLC.Var () . DeBruijn . Index $ l - l'
         Nothing -> rawTermToUPLC map' l term
 

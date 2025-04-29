@@ -944,7 +944,7 @@ compile' t = {-# SCC "compile'" #-}
           (\b (lvl, def) -> UPLC.Apply () (UPLC.LamAbs () (DeBruijn . Index $ 0) b) (rawTermToUPLC map' lvl def))
           body
           defs
-   in traceShow (t',countTerms t') wrapped
+   in traceShow ({- t', -} countTerms t') wrapped
 
 -- | Compile a (closed) Plutus Term to a usable script
 compile :: Config -> ClosedTerm a -> Either Text Script

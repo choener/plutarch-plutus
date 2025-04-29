@@ -78,7 +78,7 @@ pfindPlaceholder idx x = TermCont $ \f -> Term $ \i -> do
     findPlaceholder (RApply x xs) = any findPlaceholder (x : xs)
     findPlaceholder (RForce x) = findPlaceholder x
     findPlaceholder (RDelay x) = findPlaceholder x
-    findPlaceholder (RHoisted (HoistedTerm _ x)) = findPlaceholder x
+    findPlaceholder (RHoisted (HoistedTerm _ _ x)) = findPlaceholder x
     findPlaceholder (RPlaceHolder idx') = idx == idx'
     findPlaceholder (RConstr _ xs) = any findPlaceholder xs
     findPlaceholder (RCase x xs) = any findPlaceholder (x : xs)
@@ -105,7 +105,7 @@ pfindPlaceholders idxs x = TermCont $ \f -> Term $ \i -> do
     findPlaceholders (RApply x xs) = conv (x:xs)
     findPlaceholders (RForce x)= findPlaceholders x
     findPlaceholders (RDelay x)= findPlaceholders x
-    findPlaceholders (RHoisted (HoistedTerm _ x)) = findPlaceholders x
+    findPlaceholders (RHoisted (HoistedTerm _ _ x)) = findPlaceholders x
     findPlaceholders (RPlaceHolder idx') = map (idx'==) idxs
     findPlaceholders (RConstr _ xs) = conv xs
     findPlaceholders (RCase x xs) = conv (x:xs)
@@ -134,7 +134,7 @@ pfindPlaceholderSet idxs x = TermCont $ \f -> Term $ \i -> do
     findPlaceholders js (RApply x xs) = rungo js (x:xs)
     findPlaceholders js (RForce x)= findPlaceholders js x
     findPlaceholders js (RDelay x)= findPlaceholders js x
-    findPlaceholders js (RHoisted (HoistedTerm _ x)) = findPlaceholders js x
+    findPlaceholders js (RHoisted (HoistedTerm _ _ x)) = findPlaceholders js x
     findPlaceholders js (RPlaceHolder (fromIntegral -> idx')) = IntSet.filter (idx'==) js
     findPlaceholders js (RConstr _ xs) = rungo js xs
     findPlaceholders js (RCase x xs) = rungo js (x:xs)

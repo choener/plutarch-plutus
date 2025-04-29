@@ -4,6 +4,7 @@
 {-# OPTIONS_GHC -Wno-unused-matches #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
+{-# LANGUAGE MagicHash #-}
 
 module Plutarch.Internal.Term (
   -- | \$hoisted
@@ -71,7 +72,7 @@ import Data.Aeson (
 import Data.ByteString qualified as BS
 import Data.Default (def)
 import Data.Kind (Type)
-import Data.List (foldl', groupBy, sortOn, sort, group)
+import Data.List (foldl', groupBy, sortOn, sort, group, intercalate, nub)
 import Data.Map.Lazy qualified as M
 import Data.Monoid (Last (Last))
 import Data.Set qualified as S
@@ -92,7 +93,7 @@ import UntypedPlutusCore qualified as UPLC
 import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef')
 import qualified Data.Map.Strict as CacheMap
 import System.IO.Unsafe (unsafePerformIO)
-import Debug.Trace (traceM, traceShow)
+import Debug.Trace (traceM, traceShow, trace)
 import Data.ByteString.Builder (Builder)
 import Data.Int (Int8)
 import qualified Data.ByteString.Builder as Builder
@@ -104,6 +105,11 @@ import Control.DeepSeq qualified as DeepSeq
 import Data.Hashable qualified as H
 import Data.HashMap.Strict qualified as HM
 import Data.HashSet qualified as HS
+import GHC.Base (reallyUnsafePtrEquality)
+import GHC.Exception (SrcLoc, getCallStack, CallStack)
+import Text.Printf (hPrintf, printf)
+import System.IO (stderr)
+import GHC.Exception (prettySrcLoc)
 
 {- $hoisted
  __Explanation for hoisted terms:__
@@ -123,25 +129,22 @@ import Data.HashSet qualified as HS
 newtype Dig = Dig Int -- (Digest Blake2b_160)
   deriving stock (Show,Eq,Ord)
 
-{-
-instance Eq Dig where
-  Dig lh ld == Dig rh rd = {-# SCC "Eq/Dig" #-} lh == rh && ({-# SCC "Eq/digest" #-} ld == rd)
+newtype TheCallStack = TheCallStack [(String, SrcLoc)]
+  deriving stock (Show,Eq)
 
-instance Ord Dig where
-  compare = {-# SCC "Ord/Dig" #-} go
-    where
-      Dig lh ld `go` Dig rh rd
-        | lh < rh = LT
-        | lh > rh = GT
-        | otherwise = {-# SCC "Ord/digest" #-} compare ld rd
--}
+data HoistedTerm = HoistedTerm Dig TheCallStack RawTerm
 
-data HoistedTerm = HoistedTerm Dig RawTerm
-  deriving stock (Eq,Show)
+instance Eq HoistedTerm where
+  HoistedTerm dl _ rtl == HoistedTerm dr _ rtr = dl == dr && rtl == rtr
+
+instance Show HoistedTerm where
+  show (HoistedTerm dig _ rawTerm) = "HoistedTerm " ++ show rawTerm ++ " " ++ show dig
 
 instance H.Hashable HoistedTerm where
   hashWithSalt = H.defaultHashWithSalt
-  hash (HoistedTerm (Dig h) _) = h
+  {-# Inline hashWithSalt #-}
+  hash (HoistedTerm (Dig h) _ _) = h
+  {-# Inline hash #-}
 
 type UTerm = UPLC.Term UPLC.DeBruijn UPLC.DefaultUni UPLC.DefaultFun ()
 
@@ -163,6 +166,7 @@ data RawTerm
 
 instance H.Hashable RawTerm where
   hashWithSalt = H.defaultHashWithSalt
+  {-# Inline hashWithSalt #-}
   hash = {-# SCC "Hashable" #-} \case
     RVar x -> H.hash (0 :: Int, fromIntegral x :: Int)
     RLamAbs n x -> H.hash (1 :: Int, n, x)
@@ -172,11 +176,12 @@ instance H.Hashable RawTerm where
     RConstant x -> H.hash (5 :: Int, x)
     RBuiltin x -> H.hash (6 :: Int, x)
     RError -> 7 :: Int
-    RHoisted (HoistedTerm (Dig h) _) -> H.hash (8 :: Int, h)
+    RHoisted (HoistedTerm (Dig h) _ _) -> H.hash (8 :: Int, h)
     RCompiled code -> H.hash (9 :: Int, code)
     RPlaceHolder x -> H.hash (10 :: Int, x)
     RConstr x y -> H.hash (11 :: Int, x, y)
     RCase x y -> H.hash (12 :: Int, x, y)
+  {-# Inline hash #-}
 
 addHashIndex :: forall alg. HashAlgorithm alg => Integer -> Context alg -> Context alg
 addHashIndex i = flip hashUpdate ((fromString $ show i) :: BS.ByteString)
@@ -196,7 +201,6 @@ hashUTerm = {-# SCC "hashUTerm" #-} go
       addHashIndex 8 . addHashIndex (fromIntegral idx) . foldl1 (.) (hashUTerm <$> uterms)
     go (UPLC.Case _ uterm uterms) = addHashIndex 9 . hashUTerm uterm . foldl1 (.) (hashUTerm <$> uterms)
 
-{-
 hashRawTerm' :: forall alg. HashAlgorithm alg => RawTerm -> Context alg -> Context alg
 hashRawTerm' (RVar x) = addHashIndex 0 . flip hashUpdate (F.flat (fromIntegral x :: Integer))
 hashRawTerm' (RLamAbs n x) =
@@ -208,14 +212,16 @@ hashRawTerm' (RDelay x) = addHashIndex 4 . hashRawTerm' x
 hashRawTerm' (RConstant x) = addHashIndex 5 . flip hashUpdate (F.flat x)
 hashRawTerm' (RBuiltin x) = addHashIndex 6 . flip hashUpdate (F.flat x)
 hashRawTerm' RError = addHashIndex 7
-hashRawTerm' (RHoisted (HoistedTerm (Dig h hash) _)) = addHashIndex 8 . flip hashUpdate hash
+hashRawTerm' (RHoisted (HoistedTerm (Dig _) _ xs)) = addHashIndex 8 . hashRawTerm' xs
 hashRawTerm' (RCompiled code) = addHashIndex 9 . flip hashUpdate (hashUTerm @alg code hashInit)
 hashRawTerm' (RPlaceHolder x) = addHashIndex 10 . addHashIndex x
 hashRawTerm' (RConstr x y) =
   addHashIndex 11 . flip hashUpdate (F.flat (fromIntegral x :: Integer)) . flip (foldl' $ flip hashRawTerm') y
 hashRawTerm' (RCase x y) =
   addHashIndex 12 . hashRawTerm' x . flip (foldl' $ flip hashRawTerm') y
-  -}
+
+hashMe :: RawTerm -> Digest Blake2b_160
+hashMe t = hashFinalize . hashRawTerm' t $ hashInit
 
 hashRawTerm :: RawTerm -> Dig
 hashRawTerm t = Dig (H.hash t) -- (hashFinalize . hashRawTerm' t $ hashInit)
@@ -238,7 +244,7 @@ countTerms = {-# SCC "countTerms" #-} go
     go (RConstant x) = 1
     go (RBuiltin x) = 1
     go RError = 1
-    go (RHoisted (HoistedTerm _ term)) = 1 + go term
+    go (RHoisted (HoistedTerm _ _ term)) = 1 + go term
     go (RCompiled code) = 1
     go (RPlaceHolder x) = 1
     go (RConstr x y) = 1 + sum (map go y)
@@ -550,8 +556,8 @@ plam' f = Term \i ->
     getArity :: RawTerm -> Maybe Word64
     -- We only do this if it's hoisted, since it's only safe if it doesn't
     -- refer to any of the variables in the wrapping lambda.
-    getArity (RHoisted (HoistedTerm _ (RLamAbs n _))) = Just n
-    getArity (RHoisted (HoistedTerm _ t)) = getArityBuiltin t
+    getArity (RHoisted (HoistedTerm _ _ (RLamAbs n _))) = Just n
+    getArity (RHoisted (HoistedTerm _ _ t)) = getArityBuiltin t
     getArity t = getArityBuiltin t
 
     getArityBuiltin :: RawTerm -> Maybe Word64
@@ -678,7 +684,7 @@ papp x y = Term \i ->
     (_, getTerm -> RError) -> pure $ mkTermRes RError
     -- Applying to `id` changes nothing.
     (getTerm -> RLamAbs 0 (RVar 0), y') -> pure y'
-    (getTerm -> RHoisted (HoistedTerm _ (RLamAbs 0 (RVar 0))), y') -> pure y'
+    (getTerm -> RHoisted (HoistedTerm _ _ (RLamAbs 0 (RVar 0))), y') -> pure y'
     -- append argument
     (x'@(getTerm -> RApply x'l x'r), y') -> pure $ TermResult (RApply x'l (getTerm y' : x'r)) (getDeps x' <> getDeps y')
     -- new RApply
@@ -758,7 +764,7 @@ punsafeConstant = punsafeConstantInternal
 
 punsafeConstantInternal :: Some (ValueOf PLC.DefaultUni) -> Term s a
 punsafeConstantInternal c = Term \_ ->
-  let hoisted = HoistedTerm (hashRawTerm $ RConstant c) (RConstant c)
+  let hoisted = HoistedTerm (hashRawTerm $ RConstant c) (TheCallStack $ getCallStack callStack) (RConstant c)
    in pure $ TermResult (RHoisted hoisted) [hoisted]
 
 asClosedRawTerm :: ClosedTerm a -> TermMonad TermResult
@@ -810,7 +816,8 @@ phoistAcyclic t = {-# SCC "phoistAcyclic" #-} Term \_ ->
   asRawTerm t 0 >>= \case
     -- Built-ins are smaller than variable references
     t'@(getTerm -> RBuiltin _) -> pure t'
-    t' -> let hoisted = HoistedTerm (hashRawTerm . getTerm $ t') (getTerm t')
+    -- TODO: Add callstack information to the hoisted term!
+    t' -> let hoisted = HoistedTerm (hashRawTerm . getTerm $ t') (TheCallStack $ getCallStack callStack) (getTerm t')
           in pure $ TermResult (RHoisted hoisted) (hoisted : getDeps t')
 
 {-# NoInline phoistAcyclic #-}
@@ -884,44 +891,52 @@ smallEnoughToInline = \case
   RConstant (Some (ValueOf PLC.DefaultUniInteger n)) | n < 256 -> True
   _ -> False
 
+-- | Caches each RawTerm that is being compiled. Stores the call stack to allow observing hoisting opportunities.
+
+cache_compile_notes :: IORef (HM.HashMap RawTerm [TheCallStack])
+cache_compile_notes = unsafePerformIO . newIORef $ HM.empty
+{-# NoInline cache_compile_notes #-}
+
+cache_add_RawTerm :: TheCallStack -> RawTerm -> IO RawTerm
+cache_add_RawTerm compileCallStack rawTerm = do
+  let callStack = case rawTerm of
+        RHoisted (HoistedTerm _ c _) -> c
+        _ -> compileCallStack
+  ret <- atomicModifyIORef' cache_compile_notes (\cacheMap ->
+    let val = HM.findWithDefault [] rawTerm cacheMap
+        ins = callStack : val
+    in  (HM.insert rawTerm ins cacheMap, ins))
+  case ret of
+    [] -> error "impossible"
+    [c] -> hPrintf stderr "\nNEW RawTerm compiled:\n%s\n" (prettyTheCallStack c)
+    xs -> hPrintf stderr "\nKNOWN RawTerm compiled:\n%s\nSeen %d times in total\n" (intercalate ".\n" $ map prettyTheCallStack $ nub xs) (length xs)
+  seq ret $ pure rawTerm
+{-# NoInline cache_add_RawTerm #-}
+
+prettyTheCallStack :: TheCallStack -> String
+prettyTheCallStack (TheCallStack ls) = intercalate "\n" $ go ls
+  where
+    go [] = [] :: [String]
+    go ((s,scr):xs) = printf "%s %s" s (prettySrcLoc scr) : go xs
+{-# NoInline prettyTheCallStack #-}
+
 -- The logic is mostly for hoisting
-compile' :: TermResult -> UTerm
+compile' :: HasCallStack => TermResult -> UTerm
 compile' t = {-# SCC "compile'" #-}
-  let t' = getTerm t
+  let t' = unsafePerformIO . cache_add_RawTerm (TheCallStack $ getCallStack callStack) $ getTerm t
       deps = getDeps t
 
-      {-
-      f :: Word64 -> Maybe Word64 -> (Bool, Maybe Word64)
-      f n Nothing = (True, Just n)
-      f _ (Just n) = (False, Just n)
-      -}
-
-      {-
-      g ::
-        HoistedTerm ->
-        (M.Map Dig Word64, [(Word64, RawTerm)], Word64) ->
-        (M.Map Dig Word64, [(Word64, RawTerm)], Word64)
-      g (HoistedTerm hash term) (m, defs, n) = {-# SCC "compile'g" #-} case M.alterF (f n) hash m of
-        (True, m) -> (m, (n, term) : defs, n + 1)
-        (False, m) -> (m, defs, n)
-      -}
-
-      gg :: HoistedTerm ->
+      g :: HoistedTerm ->
           (HM.HashMap HoistedTerm Word64, [(Word64, RawTerm)], Word64) ->
           (HM.HashMap HoistedTerm Word64, [(Word64, RawTerm)], Word64)
-      gg hoistedTerm@(HoistedTerm _ term) (m, defs, n) = {-# SCC "compile'gg" #-} case HM.lookup hoistedTerm m of
+      g hoistedTerm@(HoistedTerm _ _ term) (m, defs, n) = {-# SCC "compile'gg" #-} case HM.lookup hoistedTerm m of
         Nothing -> (m, (n, term) : defs, n+1)
         Just w64 -> (m, defs, n)
-
-      {-
-      hoistedTermRaw :: HoistedTerm -> RawTerm
-      hoistedTermRaw (HoistedTerm _ t) = t
-      -}
 
       toInline :: HM.HashMap HoistedTerm Int
       toInline = {-# SCC "compile'toInline" #-}
         -- keep only count "1"s or small enough to inline ones
-        HM.filterWithKey (\(HoistedTerm _ term) count -> count == 1 || smallEnoughToInline term)
+        HM.filterWithKey (\(HoistedTerm _ _ term) count -> count == 1 || smallEnoughToInline term)
         -- count how often a hoisted term occurs
         $ HM.fromListWith (+) . map (,1) $ deps
 
@@ -930,10 +945,9 @@ compile' t = {-# SCC "compile'" #-}
       -- defs: the terms, level 0 is last
       -- n: # of terms
       (m :: HM.HashMap HoistedTerm Word64, defs, n) = {-# SCC "compile'foldr" #-}
-        foldr gg (HM.empty, [], 0) $ filter (\hoistedTerm -> not $ HM.member hoistedTerm toInline) deps
+        foldr g (HM.empty, [], 0) $ filter (\hoistedTerm -> not $ HM.member hoistedTerm toInline) deps
 
-      -- map' :: HoistedTerm -> Word64 -> _
-      map' hoistedTerm@(HoistedTerm hash term) l = {-# SCC "compile'map'" #-} case HM.lookup hoistedTerm m of
+      map' hoistedTerm@(HoistedTerm hash _ term) l = {-# SCC "compile'map'" #-} case HM.lookup hoistedTerm m of
         Just l' -> UPLC.Var () . DeBruijn . Index $ l - l'
         Nothing -> rawTermToUPLC map' l term
 
@@ -944,10 +958,11 @@ compile' t = {-# SCC "compile'" #-}
           (\b (lvl, def) -> UPLC.Apply () (UPLC.LamAbs () (DeBruijn . Index $ 0) b) (rawTermToUPLC map' lvl def))
           body
           defs
-   in traceShow ({- t', -} countTerms t') wrapped
+   in wrapped
+{-# NoInline compile' #-}
 
 -- | Compile a (closed) Plutus Term to a usable script
-compile :: Config -> ClosedTerm a -> Either Text Script
+compile :: HasCallStack => Config -> ClosedTerm a -> Either Text Script
 compile config t = case asClosedRawTerm t of
   TermMonad (ReaderT t') -> Script . UPLC.Program () uplcVersion . compile' <$> t' (defaultInternalConfig, config)
 
@@ -957,7 +972,7 @@ always elide tracing (as if with 'NoTracing').
 @since 1.10.0
 -}
 compileOptimized ::
-  forall (a :: S -> Type).
+  forall (a :: S -> Type). HasCallStack =>
   (forall (s :: S). Term s a) ->
   Either Text Script
 compileOptimized t = case asClosedRawTerm t of
@@ -999,7 +1014,7 @@ possible\'; embedding 'Term's produced by 'optimizeTerm' into larger
 computations can lead to size blowout if not done carefully.
 -}
 optimizeTerm ::
-  forall (a :: S -> Type).
+  forall (a :: S -> Type). HasCallStack =>
   (forall (s :: S). Term s a) ->
   (forall (s :: S). Term s a)
 optimizeTerm (Term raw) = Term $ \w64 ->

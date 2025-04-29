@@ -908,7 +908,7 @@ cache_add_RawTerm compileCallStack rawTerm = do
     in  (HM.insert rawTerm ins cacheMap, ins))
   case ret of
     [] -> error "impossible"
-    [c] -> hPrintf stderr "\nNEW RawTerm compiled:\n%s\n" (prettyTheCallStack c)
+    [c] -> hPrintf stderr "\nNEW RawTerm compiled (size %d):\n%s\n" (countTerms rawTerm) (prettyTheCallStack c)
     xs -> hPrintf stderr "\nKNOWN RawTerm compiled:\n%s\nSeen %d times in total\n" (intercalate ".\n" $ map prettyTheCallStack $ nub xs) (length xs)
   seq ret $ pure rawTerm
 {-# NoInline cache_add_RawTerm #-}

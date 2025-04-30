@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances       #-}
 {-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 
 module Plutarch.Repr.Internal (
   RecAsHaskell,
@@ -30,8 +31,11 @@ import Plutarch.Builtin.Bool (PBool, pif)
 import Plutarch.Builtin.Integer (PInteger, pconstantInteger)
 import Plutarch.Internal.Eq (PEq, (#==))
 import Plutarch.Internal.Lift (AsHaskell, pconstant)
-import Plutarch.Internal.Term (Dig, S, Term, plet)
+import Plutarch.Internal.Term (Dig, S, Term, plet, RawTerm)
 import Plutarch.Internal.TermCont (hashOpenTerm, unTermCont)
+import qualified Data.HashMap.Strict as HM
+import Control.Arrow (Arrow(..))
+import qualified Data.Hashable as H
 
 -- | @since 1.10.0
 newtype PStruct (struct :: [[S -> Type]]) (s :: S) = PStruct
@@ -90,17 +94,33 @@ gstructEq x y =
 -}
 groupHandlers :: forall (s :: S) (r :: S -> Type). [(Integer, Term s r)] -> Term s PInteger -> Term s r
 groupHandlers handlers idx = unTermCont $ do
-  handlersWithHash :: [(Integer, (Term s b, Dig))] <-
-    traverse (\(i, t) -> (\hash -> (i, (t, hash))) <$> hashOpenTerm t) handlers
+  -- OLD: for each handler, we now have the cryptographic hash as well. This Dig should be unique for the Term AST.
+  -- TODO: Calculate the Hashable hash only. Be prepared to compare for equality.
+  --handlersWithHash :: [(Integer, (Term s b, Dig))] <-
+  --  traverse (\(i, t) -> (\hash -> (i, (t, hash))) <$> hashOpenTerm t) handlers
+  handlersWithHash :: [(H.Hashed RawTerm, (Integer, Term s b))] <-
+    traverse (\(i, t) -> (,(i,t)) <$> hashOpenTerm t) handlers
 
   let
+    {-
     groupedHandlers :: [([Integer], Term s b)]
     groupedHandlers =
+      -- OLD: Then sort by length of the [Integer] lists
       sortBy (\g1 g2 -> length (fst g1) `compare` length (fst g2)) $
+        -- OLD: collects all the different Integer into the first of the pair. then a representative Term into the second of the pair
         (\g -> (fst <$> g, fst $ snd $ head g))
+          -- OLD: Below, the (Integer, (Term,Dig)) are grouped, based on the dig (snd.snd)
           <$> groupBy
             (\x1 x2 -> snd (snd x1) == snd (snd x2))
             (sortBy (\(_, (_, h1)) (_, (_, h2)) -> h1 `compare` h2) handlersWithHash)
+            -}
+
+  -- TODO: Create a hashmap for all the Term s b
+    groupedHandlers' :: [([Integer], Term s b)]
+    groupedHandlers'
+      = HM.elems
+      . HM.map (\xs -> (map fst xs, snd $ head xs))
+      $ HM.fromListWith (++) $ map (second (:[])) handlersWithHash
 
   pure $
     let
@@ -124,12 +144,12 @@ groupHandlers handlers idx = unTermCont $ do
       pgo' ((is, t) : rest) = buildIfs is t $ pgo' rest
       pgo' [] = error "impossible"
 
-      -- So that GHC doesn't complain
+      -- So that GHC doesn't complain (because only one of the two is actually being used currently)
       _a = pgo'
       _b = pgo
      in
       -- first one seems to be faster
-      pgo groupedHandlers
+      pgo groupedHandlers'
 
 -- | @since 1.10.0
 class

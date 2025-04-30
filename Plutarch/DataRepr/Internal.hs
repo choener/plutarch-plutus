@@ -24,7 +24,7 @@ import Data.Coerce (coerce)
 import Data.Functor.Compose qualified as F
 import Data.Functor.Const (Const (Const))
 import Data.Kind (Type)
-import Data.List (groupBy, maximumBy, sortOn)
+import Data.List (maximumBy)
 import Data.Proxy (Proxy (Proxy))
 import Data.SOP.NP (cana_NP)
 import Data.String (fromString)
@@ -62,8 +62,8 @@ import Plutarch.Internal.PlutusType (DerivePlutusType (DPTStrat), DerivedPInner,
                                      PlutusTypeStrat, PlutusTypeStratConstraint,
                                      derivedPCon, derivedPMatch, pcon, pmatch)
 import Plutarch.Internal.Show (PShow (pshow'))
-import Plutarch.Internal.Term (Dig, Term, pdelay, perror, pforce, phoistAcyclic,
-                               plet, (#$), (#), (:-->))
+import Plutarch.Internal.Term (Term, pdelay, perror, pforce, phoistAcyclic,
+                               plet, (#$), (#), (:-->), RawTerm)
 import Plutarch.Internal.Term qualified as P
 import Plutarch.Internal.TermCont (TermCont, hashOpenTerm, runTermCont, tcont,
                                    unTermCont)
@@ -74,6 +74,9 @@ import Plutarch.Internal.TryFrom (PSubtype',
 import Plutarch.Reducible (NoReduce, Reduce)
 import Plutarch.Trace (ptraceInfoError)
 import Plutarch.Unsafe (punsafeCoerce)
+import qualified Data.Hashable as H
+import qualified Data.HashMap.Strict as HM
+import Control.Arrow (Arrow(..))
 
 {- | A "record" of `exists a. PAsData a`. The underlying representation is
  `PBuiltinList PData`.
@@ -424,7 +427,7 @@ pmatchLT d1 d2 handlers = unTermCont $ do
         : applyHandlers args1 args2 rest
 
 reprHandlersGo ::
-  (Dig, Term s out) ->
+  (H.Hashed RawTerm, Term s out) ->
   Integer ->
   [Term s out] ->
   Term s PInteger ->
@@ -440,17 +443,18 @@ reprHandlersGo common idx (handler : rest) c =
           handler
           $ reprHandlersGo common (idx + 1) rest c
 
-hashHandlers :: [Term s out] -> TermCont s [(Dig, Term s out)]
+hashHandlers :: [Term s out] -> TermCont s [(H.Hashed RawTerm, Term s out)]
 hashHandlers [] = pure []
 hashHandlers (handler : rest) = do
   hash <- hashOpenTerm handler
   hashes <- hashHandlers rest
   pure $ (hash, handler) : hashes
 
-findCommon :: [Term s out] -> TermCont s (Dig, Term s out)
+findCommon :: [Term s out] -> TermCont s (H.Hashed RawTerm, Term s out)
 findCommon handlers = do
   l <- hashHandlers handlers
-  pure $ head . maximumBy (\x y -> length x `compare` length y) . groupBy (\x y -> fst x == fst y) . sortOn fst $ l
+  -- pure $ head . maximumBy (\x y -> length x `compare` length y) . groupBy (\x y -> fst x == fst y) . sortOn fst $ l
+  pure . second head . maximumBy (\x y -> length x `compare` length y) . HM.toList . HM.fromListWith (++) $ map (second (:[])) l
 
 mkLTHandler :: forall def s. All (Compose POrd PDataRecord) def => NP (DualReprHandler s PBool) def
 mkLTHandler = cana_NP (Proxy @(Compose POrd PDataRecord)) rer $ Const ()

@@ -17,11 +17,12 @@ import Data.IntSet qualified as IntSet
 import Data.Kind (Type)
 import Data.List (foldl', transpose, (\\))
 import Data.String (fromString)
-import Plutarch.Internal.Term (Config (Tracing), Dig, HoistedTerm (..), PType,
+import Plutarch.Internal.Term (Config (Tracing), Dig (..), HoistedTerm (..), PType,
                                RawTerm (..), S, Term (Term),
                                TracingMode (DetTracing), asRawTerm, getTerm,
-                               hashRawTerm, perror, pgetConfig)
+                               perror, pgetConfig)
 import Plutarch.Internal.Trace (ptraceInfo)
+import qualified Data.Hashable as H
 
 newtype TermCont :: forall (r :: PType). S -> Type -> Type where
   TermCont :: forall r s a. {runTermCont :: (a -> Term s r) -> Term s r} -> TermCont @r s a
@@ -56,10 +57,11 @@ instance MonadFail (TermCont s) where
 tcont :: ((a -> Term s r) -> Term s r) -> TermCont @r s a
 tcont = TermCont
 
-hashOpenTerm :: Term s a -> TermCont s Dig
+hashOpenTerm :: Term s a -> TermCont s (H.Hashed RawTerm)
 hashOpenTerm x = TermCont $ \f -> Term $ \i -> do
   y <- asRawTerm x i
-  asRawTerm (f . hashRawTerm . getTerm $ y) i
+  let r = getTerm y
+  asRawTerm (f $ H.hashed r) i
 
 -- This can technically be done outside of TermCont.
 -- Need to pay close attention when killing branch with this.

@@ -32,9 +32,9 @@ module Plutarch.Internal.Term (
   compile',
   optimizeTerm,
   ClosedTerm,
-  Dig,
-  hashTerm,
-  hashRawTerm,
+  Dig (..),
+  -- hashTerm,
+  -- hashRawTerm,
   RawTerm (..),
   HoistedTerm (..),
   TermResult (TermResult, getDeps, getTerm),
@@ -93,7 +93,7 @@ import UntypedPlutusCore qualified as UPLC
 import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef')
 import qualified Data.Map.Strict as CacheMap
 import System.IO.Unsafe (unsafePerformIO)
-import Debug.Trace (traceM, traceShow, trace)
+import Debug.Trace (traceM, traceShow, trace, traceShowM)
 import Data.ByteString.Builder (Builder)
 import Data.Int (Int8)
 import qualified Data.ByteString.Builder as Builder
@@ -106,10 +106,10 @@ import Data.Hashable qualified as H
 import Data.HashMap.Strict qualified as HM
 import Data.HashSet qualified as HS
 import GHC.Base (reallyUnsafePtrEquality)
-import GHC.Exception (SrcLoc, getCallStack, CallStack)
+import GHC.Exception
+    ( SrcLoc, getCallStack, CallStack, prettySrcLoc )
 import Text.Printf (hPrintf, printf)
 import System.IO (stderr)
-import GHC.Exception (prettySrcLoc)
 
 {- $hoisted
  __Explanation for hoisted terms:__
@@ -128,6 +128,12 @@ import GHC.Exception (prettySrcLoc)
 
 newtype Dig = Dig Int -- (Digest Blake2b_160)
   deriving stock (Show,Eq,Ord)
+
+instance H.Hashable Dig where
+  hashWithSalt = H.defaultHashWithSalt
+  {-# Inline hashWithSalt #-}
+  hash (Dig k) = k
+  {-# Inline hash #-}
 
 newtype TheCallStack = TheCallStack [(String, SrcLoc)]
   deriving stock (Show,Eq)
@@ -223,8 +229,8 @@ hashRawTerm' (RCase x y) =
 hashMe :: RawTerm -> Digest Blake2b_160
 hashMe t = hashFinalize . hashRawTerm' t $ hashInit
 
-hashRawTerm :: RawTerm -> Dig
-hashRawTerm t = Dig (H.hash t) -- (hashFinalize . hashRawTerm' t $ hashInit)
+--hashRawTerm :: RawTerm -> Dig
+--hashRawTerm t = Dig (H.hash t) -- (hashFinalize . hashRawTerm' t $ hashInit)
 
 data TermResult = TermResult
   { getTerm :: RawTerm
@@ -764,7 +770,7 @@ punsafeConstant = punsafeConstantInternal
 
 punsafeConstantInternal :: Some (ValueOf PLC.DefaultUni) -> Term s a
 punsafeConstantInternal c = Term \_ ->
-  let hoisted = HoistedTerm (hashRawTerm $ RConstant c) (TheCallStack $ getCallStack callStack) (RConstant c)
+  let hoisted = HoistedTerm (Dig . H.hash $ RConstant c) (TheCallStack $ getCallStack callStack) (RConstant c)
    in pure $ TermResult (RHoisted hoisted) [hoisted]
 
 asClosedRawTerm :: ClosedTerm a -> TermMonad TermResult
@@ -817,10 +823,8 @@ phoistAcyclic t = {-# SCC "phoistAcyclic" #-} Term \_ ->
     -- Built-ins are smaller than variable references
     t'@(getTerm -> RBuiltin _) -> pure t'
     -- TODO: Add callstack information to the hoisted term!
-    t' -> let hoisted = HoistedTerm (hashRawTerm . getTerm $ t') (TheCallStack $ getCallStack callStack) (getTerm t')
+    t' -> let hoisted = HoistedTerm (Dig . H.hash . getTerm $ t') (TheCallStack $ getCallStack callStack) (getTerm t')
           in pure $ TermResult (RHoisted hoisted) (hoisted : getDeps t')
-
-{-# NoInline phoistAcyclic #-}
 
 -- Couldn't find a definition for this in plutus-core
 subst :: Word64 -> (Word64 -> UTerm) -> UTerm -> UTerm
@@ -936,9 +940,11 @@ compile' t = {-# SCC "compile'" #-}
       toInline :: HM.HashMap HoistedTerm Int
       toInline = {-# SCC "compile'toInline" #-}
         -- keep only count "1"s or small enough to inline ones
-        HM.filterWithKey (\(HoistedTerm _ _ term) count -> count == 1 || smallEnoughToInline term)
-        -- count how often a hoisted term occurs
-        $ HM.fromListWith (+) . map (,1) $ deps
+        HM.filterWithKey (\(HoistedTerm _ _ term) count -> count == 1 || smallEnoughToInline term) depsCount
+
+      -- count how often a hoisted term occurs
+      depsCount :: HM.HashMap HoistedTerm Int
+      depsCount = HM.fromListWith (+) . map (,1) $ deps
 
 
       -- map: term -> de Bruijn level
@@ -958,7 +964,7 @@ compile' t = {-# SCC "compile'" #-}
           (\b (lvl, def) -> UPLC.Apply () (UPLC.LamAbs () (DeBruijn . Index $ 0) b) (rawTermToUPLC map' lvl def))
           body
           defs
-   in wrapped
+   in traceShow (HM.elems depsCount, HM.size depsCount, HM.size toInline) wrapped
 {-# NoInline compile' #-}
 
 -- | Compile a (closed) Plutus Term to a usable script
@@ -1035,8 +1041,8 @@ optimizeTerm (Term raw) = Term $ \w64 ->
       debruijnd <- UPLC.deBruijnTerm simplified
       pure . UPLC.termMapNames UPLC.unNameDeBruijn $ debruijnd
 
-hashTerm :: Config -> ClosedTerm a -> Either Text Dig
-hashTerm config t = hashRawTerm . getTerm <$> runReaderT (runTermMonad $ asRawTerm t 0) (defaultInternalConfig, config)
+--hashTerm :: Config -> ClosedTerm a -> Either Text Dig
+--hashTerm config t = hashRawTerm . getTerm <$> runReaderT (runTermMonad $ asRawTerm t 0) (defaultInternalConfig, config)
 
 {- |
   High precedence infixl synonym of 'papp', to be used like

@@ -19,8 +19,12 @@ module Plutarch.Repr.Internal (
   RecTypePrettyError,
 ) where
 
+import Control.Arrow (Arrow (..))
+import Data.Hashable qualified as H
+import Data.HashMap.Strict qualified as HM
 import Data.Kind (Type)
 import Data.List (groupBy, sortBy)
+import Data.Ord (comparing)
 import Data.Proxy (Proxy (Proxy))
 import Generics.SOP (All, All2, AllZipN, Code, I, K (K), LiftedCoercible,
                      NP (Nil, (:*)), NS (S, Z), Prod, SListI, SOP (SOP),
@@ -31,11 +35,8 @@ import Plutarch.Builtin.Bool (PBool, pif)
 import Plutarch.Builtin.Integer (PInteger, pconstantInteger)
 import Plutarch.Internal.Eq (PEq, (#==))
 import Plutarch.Internal.Lift (AsHaskell, pconstant)
-import Plutarch.Internal.Term (Dig, S, Term, plet, RawTerm)
+import Plutarch.Internal.Term (Dig, RawTerm, S, Term, plet)
 import Plutarch.Internal.TermCont (hashOpenTerm, unTermCont)
-import qualified Data.HashMap.Strict as HM
-import Control.Arrow (Arrow(..))
-import qualified Data.Hashable as H
 
 -- | @since 1.10.0
 newtype PStruct (struct :: [[S -> Type]]) (s :: S) = PStruct
@@ -118,7 +119,8 @@ groupHandlers handlers idx = unTermCont $ do
   -- TODO: Create a hashmap for all the Term s b
     groupedHandlers' :: [([Integer], Term s b)]
     groupedHandlers'
-      = HM.elems
+      = sortBy (comparing (length . fst))
+      . HM.elems
       . HM.map (\xs -> (map fst xs, snd $ head xs))
       $ HM.fromListWith (++) $ map (second (:[])) handlersWithHash
 

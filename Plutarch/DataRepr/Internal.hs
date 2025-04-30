@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances       #-}
 {-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 
 module Plutarch.DataRepr.Internal (
   PDataSum (..),
@@ -20,14 +21,19 @@ module Plutarch.DataRepr.Internal (
   PlutusTypeData,
 ) where
 
+import Control.Arrow (Arrow (..))
 import Data.Coerce (coerce)
 import Data.Functor.Compose qualified as F
 import Data.Functor.Const (Const (Const))
+import Data.Hashable qualified as H
+import Data.HashMap.Strict qualified as HM
 import Data.Kind (Type)
 import Data.List (maximumBy)
+import Data.Ord (comparing)
 import Data.Proxy (Proxy (Proxy))
 import Data.SOP.NP (cana_NP)
 import Data.String (fromString)
+import Debug.Trace (traceShowM)
 import Generics.SOP (All, Compose, K (K), NP (Nil, (:*)), NS (S, Z), SListI,
                      SOP (SOP), Top, case_SList, hcollapse, hindex, hmap,
                      para_SList)
@@ -62,8 +68,8 @@ import Plutarch.Internal.PlutusType (DerivePlutusType (DPTStrat), DerivedPInner,
                                      PlutusTypeStrat, PlutusTypeStratConstraint,
                                      derivedPCon, derivedPMatch, pcon, pmatch)
 import Plutarch.Internal.Show (PShow (pshow'))
-import Plutarch.Internal.Term (Term, pdelay, perror, pforce, phoistAcyclic,
-                               plet, (#$), (#), (:-->), RawTerm)
+import Plutarch.Internal.Term (RawTerm, Term, pdelay, perror, pforce,
+                               phoistAcyclic, plet, (#$), (#), (:-->))
 import Plutarch.Internal.Term qualified as P
 import Plutarch.Internal.TermCont (TermCont, hashOpenTerm, runTermCont, tcont,
                                    unTermCont)
@@ -74,9 +80,6 @@ import Plutarch.Internal.TryFrom (PSubtype',
 import Plutarch.Reducible (NoReduce, Reduce)
 import Plutarch.Trace (ptraceInfoError)
 import Plutarch.Unsafe (punsafeCoerce)
-import qualified Data.Hashable as H
-import qualified Data.HashMap.Strict as HM
-import Control.Arrow (Arrow(..))
 
 {- | A "record" of `exists a. PAsData a`. The underlying representation is
  `PBuiltinList PData`.
@@ -451,10 +454,11 @@ hashHandlers (handler : rest) = do
   pure $ (hash, handler) : hashes
 
 findCommon :: [Term s out] -> TermCont s (H.Hashed RawTerm, Term s out)
+-- NOTE: (choener) Not used during compilation in onchain?
 findCommon handlers = do
   l <- hashHandlers handlers
   -- pure $ head . maximumBy (\x y -> length x `compare` length y) . groupBy (\x y -> fst x == fst y) . sortOn fst $ l
-  pure . second head . maximumBy (\x y -> length x `compare` length y) . HM.toList . HM.fromListWith (++) $ map (second (:[])) l
+  pure . second head . maximumBy (comparing (length . snd)) . HM.toList . HM.fromListWith (++) $ map (second (:[])) l
 
 mkLTHandler :: forall def s. All (Compose POrd PDataRecord) def => NP (DualReprHandler s PBool) def
 mkLTHandler = cana_NP (Proxy @(Compose POrd PDataRecord)) rer $ Const ()

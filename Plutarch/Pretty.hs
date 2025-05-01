@@ -4,7 +4,8 @@ module Plutarch.Pretty (prettyTerm, prettyTermAndCost, prettyTerm', prettyScript
 
 import Control.Monad.Reader (ReaderT (runReaderT))
 import Control.Monad.ST (runST)
-import Control.Monad.State (MonadState (get, put), StateT (runStateT), modify, modify')
+import Control.Monad.State (MonadState (get, put), StateT (runStateT), modify,
+                            modify')
 import Data.ByteString.Short qualified as SBS
 import Data.Foldable (fold, toList)
 import Data.Functor (($>), (<&>))
@@ -16,24 +17,15 @@ import Plutarch.Internal.Term (ClosedTerm, Config, compile)
 import Plutarch.Pretty.Internal.BuiltinConstant (prettyConstant)
 import Plutarch.Pretty.Internal.Config (indentWidth)
 import Plutarch.Pretty.Internal.Name (freshVarName, smartName)
-import Plutarch.Pretty.Internal.TermUtils (
-  unwrapApply,
-  unwrapBindings,
-  unwrapLamAbs,
-  pattern IfThenElseLikeAST,
- )
-import Plutarch.Pretty.Internal.Types (
-  PrettyCursor (Normal, Special),
-  PrettyMonad,
-  PrettyState (PrettyState, ps'cursor, ps'nameMap),
-  builtinFunAtRef,
-  forkState,
-  insertBindings,
-  insertName,
-  nameOfRef,
-  normalizeCursor,
-  specializeCursor,
- )
+import Plutarch.Pretty.Internal.TermUtils (pattern IfThenElseLikeAST,
+                                           unwrapApply, unwrapBindings,
+                                           unwrapLamAbs)
+import Plutarch.Pretty.Internal.Types (PrettyCursor (Normal, Special),
+                                       PrettyMonad,
+                                       PrettyState (PrettyState, ps'cursor, ps'nameMap),
+                                       builtinFunAtRef, forkState,
+                                       insertBindings, insertName, nameOfRef,
+                                       normalizeCursor, specializeCursor)
 import Plutarch.Script (Script (unScript))
 import PlutusCore qualified as PLC
 import PlutusCore.Evaluation.Machine.ExBudget (ExBudget (ExBudget))
@@ -41,13 +33,9 @@ import PlutusLedgerApi.Common (serialiseUPLC)
 import Prettyprinter ((<+>))
 import Prettyprinter qualified as PP
 import System.Random.Stateful (mkStdGen, newSTGenM)
-import UntypedPlutusCore (
-  DeBruijn (DeBruijn),
-  DefaultFun,
-  DefaultUni,
-  Program (_progTerm),
-  Term (Apply, Builtin, Case, Constant, Constr, Delay, Error, Force, LamAbs, Var),
- )
+import UntypedPlutusCore (DeBruijn (DeBruijn), DefaultFun, DefaultUni,
+                          Program (_progTerm),
+                          Term (Apply, Builtin, Case, Constant, Constr, Delay, Error, Force, LamAbs, Var))
 
 -- | 'prettyTerm' for pre-compiled 'Script's.
 prettyScript :: Script -> PP.Doc ()

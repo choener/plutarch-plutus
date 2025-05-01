@@ -38,19 +38,15 @@ module Plutarch.LedgerApi.V3.Contexts (
   --  pspendsOutput
 ) where
 
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.LedgerApi.AssocMap qualified as AssocMap
 import Plutarch.LedgerApi.Interval qualified as Interval
 import Plutarch.LedgerApi.Utils (PMaybeData, PRationalData)
 import Plutarch.LedgerApi.V1.Credential (PCredential)
 import Plutarch.LedgerApi.V1.Crypto (PPubKeyHash)
-import Plutarch.LedgerApi.V1.Scripts (
-  PDatum,
-  PDatumHash,
-  PRedeemer,
-  PScriptHash,
- )
+import Plutarch.LedgerApi.V1.Scripts (PDatum, PDatumHash, PRedeemer,
+                                      PScriptHash)
 import Plutarch.LedgerApi.V1.Time (PPosixTime)
 import Plutarch.LedgerApi.V2.Tx (PTxOut)
 import Plutarch.LedgerApi.V3.Tx (PTxId, PTxOutRef)

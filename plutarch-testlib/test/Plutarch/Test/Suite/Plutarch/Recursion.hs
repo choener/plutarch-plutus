@@ -2,8 +2,8 @@ module Plutarch.Test.Suite.Plutarch.Recursion (tests) where
 
 import Plutarch.Prelude
 import Plutarch.Test.Golden (goldenEval, goldenGroup, plutarchGolden)
-import Test.Tasty (TestTree, testGroup)
 import Prelude hiding (succ)
+import Test.Tasty (TestTree, testGroup)
 
 tests :: TestTree
 tests =

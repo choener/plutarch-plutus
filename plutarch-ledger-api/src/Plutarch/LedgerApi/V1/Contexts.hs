@@ -4,8 +4,8 @@ module Plutarch.LedgerApi.V1.Contexts (
   PScriptPurpose (..),
 ) where
 
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.LedgerApi.V1.Credential qualified as Credential
 import Plutarch.LedgerApi.V1.DCert qualified as DCert
 import Plutarch.LedgerApi.V1.Tx qualified as Tx

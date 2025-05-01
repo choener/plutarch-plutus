@@ -13,26 +13,18 @@ import Data.Kind (Type)
 import Data.Text qualified as Text
 import Plutarch.Internal.Term (Config (NoTracing))
 import Plutarch.Prelude
-import Plutarch.Test.Unit (TermResult (Evaluated, FailedToCompile, FailedToEvaluate), evalTermResult)
+import Plutarch.Test.Unit (TermResult (Evaluated, FailedToCompile, FailedToEvaluate),
+                           evalTermResult)
 import Plutarch.Test.Utils (precompileTerm, prettyEquals, prettyShow)
 import Prettyprinter (Pretty)
 import Test.QuickCheck qualified as QuickCheck
 import Test.Tasty (TestName, TestTree)
-import Test.Tasty.QuickCheck (
-  Arbitrary,
-  Negative (Negative),
-  NonNegative (NonNegative),
-  NonPositive (NonPositive),
-  NonZero (NonZero),
-  Property,
-  arbitrary,
-  counterexample,
-  forAllShrinkShow,
-  property,
-  shrink,
-  testProperty,
-  (===),
- )
+import Test.Tasty.QuickCheck (Arbitrary, Negative (Negative),
+                              NonNegative (NonNegative),
+                              NonPositive (NonPositive), NonZero (NonZero),
+                              Property, arbitrary, counterexample,
+                              forAllShrinkShow, property, shrink, testProperty,
+                              (===))
 
 {- | Like `Plutarch.Test.Unit.testEvalFail` but generate terms
 

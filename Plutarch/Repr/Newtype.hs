@@ -1,6 +1,6 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes     #-}
+{-# LANGUAGE FlexibleInstances       #-}
+{-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
 module Plutarch.Repr.Newtype (
@@ -8,25 +8,12 @@ module Plutarch.Repr.Newtype (
 ) where
 
 import Data.Kind (Type)
-import GHC.Exts (Any)
-import Generics.SOP (
-  Code,
-  I (I),
-  NP (Nil, (:*)),
-  NS (Z),
-  SOP (SOP),
- )
+import Generics.SOP (Code, I (I), NP (Nil, (:*)), NS (Z), SOP (SOP))
 import Generics.SOP qualified as SOP
 import Generics.SOP.Constraint (Head)
-import Plutarch.Internal.PlutusType (
-  PContravariant',
-  PCovariant',
-  PInner,
-  PVariant',
-  PlutusType,
-  pcon',
-  pmatch',
- )
+import GHC.Exts (Any)
+import Plutarch.Internal.PlutusType (PContravariant', PCovariant', PInner,
+                                     PVariant', PlutusType, pcon', pmatch')
 import Plutarch.Internal.Term (S, Term)
 
 -- | @since 1.10.0

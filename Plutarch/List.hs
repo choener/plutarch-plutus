@@ -1,4 +1,4 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE AllowAmbiguousTypes  #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | Scott-encoded lists and ListLike typeclass
@@ -23,51 +23,26 @@ module Plutarch.List (
 import Data.Bifunctor (bimap)
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
-import GHC.Generics (Generic)
-import GHC.TypeLits (KnownNat, natVal, type (+), type (-))
 import Generics.SOP (NP (..))
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
+import GHC.TypeLits (KnownNat, natVal, type (+), type (-))
 import Plutarch.Builtin.Bool (PBool (PFalse, PTrue), pif, ptrue, (#&&))
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Internal.Eq (PEq ((#==)))
 import Plutarch.Internal.Fix (pfix)
 import Plutarch.Internal.Lift (pconstant)
-import Plutarch.Internal.ListLike (
-  PElemConstraint,
-  PIsListLike,
-  PListLike,
-  pcons,
-  pelimList,
-  pfoldl,
-  phead,
-  pnil,
-  precList,
-  ptail,
-  pzipWith',
- )
+import Plutarch.Internal.ListLike (PElemConstraint, PIsListLike, PListLike,
+                                   pcons, pelimList, pfoldl, phead, pnil,
+                                   precList, ptail, pzipWith')
 import Plutarch.Internal.Ord (POrd ((#<), (#<=)))
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.PlutusType (
-  PlutusType,
-  pcon,
-  pmatch,
- )
+import Plutarch.Internal.PlutusType (PlutusType, pcon, pmatch)
 import Plutarch.Internal.Show (PShow (pshow'), pshowList)
-import Plutarch.Internal.Term (
-  InternalConfig (..),
-  S,
-  Term,
-  perror,
-  pgetInternalConfig,
-  phoistAcyclic,
-  plet,
-  pplaceholder,
-  punsafeCoerce,
-  pwithInternalConfig,
-  (#),
-  (#$),
-  (:-->),
- )
+import Plutarch.Internal.Term (InternalConfig (..), S, Term, perror,
+                               pgetInternalConfig, phoistAcyclic, plet,
+                               pplaceholder, punsafeCoerce, pwithInternalConfig,
+                               (#$), (#), (:-->))
 import Plutarch.Internal.TermCont (pfindAllPlaceholders, unTermCont)
 import Plutarch.Internal.Trace (ptraceInfo)
 import Plutarch.Maybe (PMaybe (PJust, PNothing))

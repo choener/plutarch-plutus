@@ -1,5 +1,5 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances       #-}
+{-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
 module Plutarch.Repr.SOP (
@@ -12,68 +12,28 @@ module Plutarch.Repr.SOP (
 import Control.Arrow ((&&&))
 import Data.Kind (Constraint, Type)
 import Data.Proxy (Proxy (Proxy))
-import GHC.Exts (Any)
-import Generics.SOP (
-  Code,
-  K (K),
-  NP (Nil, (:*)),
-  NS (S, Z),
-  SOP (SOP),
- )
+import Generics.SOP (Code, K (K), NP (Nil, (:*)), NS (S, Z), SOP (SOP))
 import Generics.SOP qualified as SOP
-import Generics.SOP.Constraint (
-  All,
-  All2,
-  Head,
-  SListI,
-  SListI2,
- )
+import Generics.SOP.Constraint (All, All2, Head, SListI, SListI2)
+import GHC.Exts (Any)
 import Plutarch.Builtin.Bool (PBool)
 import Plutarch.Builtin.Opaque (POpaque)
 import Plutarch.Internal.Eq (PEq, (#==))
 import Plutarch.Internal.Lift
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.PlutusType (
-  PContravariant',
-  PContravariant'',
-  PCovariant',
-  PCovariant'',
-  PInner,
-  PVariant',
-  PVariant'',
-  PlutusType,
-  pcon,
-  pcon',
-  pmatch,
-  pmatch',
- )
-import Plutarch.Internal.Term (
-  RawTerm (RCase, RConstr),
-  S,
-  Term (Term),
-  TermResult (TermResult),
-  asRawTerm,
-  getDeps,
-  getTerm,
-  perror,
-  phoistAcyclic,
-  punsafeCoerce,
-  (#),
-  (:-->),
- )
-import Plutarch.Repr.Internal (
-  PRec (PRec, unPRec),
-  PStruct (PStruct, unPStruct),
-  RecAsHaskell,
-  RecTypePrettyError,
-  StructAsHaskell,
-  StructSameRepr,
-  UnTermRec,
-  UnTermStruct,
-  grecEq,
-  gstructEq,
-  pletL,
- )
+import Plutarch.Internal.PlutusType (PContravariant', PContravariant'',
+                                     PCovariant', PCovariant'', PInner,
+                                     PVariant', PVariant'', PlutusType, pcon,
+                                     pcon', pmatch, pmatch')
+import Plutarch.Internal.Term (RawTerm (RCase, RConstr), S, Term (Term),
+                               TermResult (TermResult), asRawTerm, getDeps,
+                               getTerm, perror, phoistAcyclic, punsafeCoerce,
+                               (#), (:-->))
+import Plutarch.Repr.Internal (PRec (PRec, unPRec),
+                               PStruct (PStruct, unPStruct), RecAsHaskell,
+                               RecTypePrettyError, StructAsHaskell,
+                               StructSameRepr, UnTermRec, UnTermStruct, grecEq,
+                               gstructEq, pletL)
 
 -- | @since 1.10.0
 newtype PSOPStruct (struct :: [[S -> Type]]) (s :: S) = PSOPStruct

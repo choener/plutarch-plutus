@@ -1,4 +1,4 @@
-{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE PolyKinds  #-}
 {-# LANGUAGE RankNTypes #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
@@ -42,8 +42,8 @@ module Plutarch.LedgerApi.Utils (
 ) where
 
 import Data.Kind (Type)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Internal.PlutusType (PlutusType (pcon', pmatch'))
 import Plutarch.Prelude
 import Plutarch.Unsafe (punsafeCoerce)

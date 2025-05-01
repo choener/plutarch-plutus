@@ -1,5 +1,5 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances       #-}
+{-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
 module Plutarch.Repr.Scott (
@@ -13,50 +13,23 @@ module Plutarch.Repr.Scott (
 
 import Data.Kind (Type)
 import Data.Proxy (Proxy (Proxy))
-import GHC.Exts (Any)
 import Generics.SOP (Code, NP (Nil, (:*)), NS (S, Z), SOP (SOP))
 import Generics.SOP qualified as SOP
 import Generics.SOP.Constraint (All, All2, Head, SListI, SListI2)
+import GHC.Exts (Any)
 import Plutarch.Internal.Eq (PEq, (#==))
 import Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.PlutusType (
-  PContravariant',
-  PContravariant'',
-  PCovariant',
-  PCovariant'',
-  PInner,
-  PVariant',
-  PVariant'',
-  PlutusType,
-  pcon,
-  pcon',
-  pmatch,
-  pmatch',
- )
+import Plutarch.Internal.PlutusType (PContravariant', PContravariant'',
+                                     PCovariant', PCovariant'', PInner,
+                                     PVariant', PVariant'', PlutusType, pcon,
+                                     pcon', pmatch, pmatch')
 import Plutarch.Internal.Quantification (PForall)
-import Plutarch.Internal.Term (
-  PDelayed,
-  S,
-  Term,
-  pdelay,
-  pforce,
-  phoistAcyclic,
-  plam',
-  punsafeCoerce,
-  (#),
-  (:-->),
- )
-import Plutarch.Repr.Internal (
-  PRec (PRec, unPRec),
-  PStruct (PStruct, unPStruct),
-  RecTypePrettyError,
-  StructSameRepr,
-  UnTermRec,
-  UnTermStruct,
-  grecEq,
-  gstructEq,
-  pletL,
- )
+import Plutarch.Internal.Term (PDelayed, S, Term, pdelay, pforce, phoistAcyclic,
+                               plam', punsafeCoerce, (#), (:-->))
+import Plutarch.Repr.Internal (PRec (PRec, unPRec),
+                               PStruct (PStruct, unPStruct), RecTypePrettyError,
+                               StructSameRepr, UnTermRec, UnTermStruct, grecEq,
+                               gstructEq, pletL)
 
 -- | @since 1.10.0
 newtype PScottStruct (struct :: [[S -> Type]]) (s :: S) = PScottStruct

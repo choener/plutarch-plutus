@@ -1,6 +1,6 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes     #-}
+{-# LANGUAGE FlexibleInstances       #-}
+{-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
 module Plutarch.Repr.Tag (
@@ -13,38 +13,20 @@ import Data.Proxy (Proxy (Proxy))
 
 import Data.Coerce (coerce)
 import Data.Kind (Type)
+import Generics.SOP (All, Code, I, K (K), NP (Nil, (:*)), NS (S, Z), SOP (SOP))
+import Generics.SOP qualified as SOP
 import GHC.Exts (Any)
 import GHC.Generics qualified as GHC
 import GHC.TypeError (ErrorMessage (ShowType, Text, (:$$:), (:<>:)), TypeError)
 import GHC.TypeLits (type (+))
-import Generics.SOP (
-  All,
-  Code,
-  I,
-  K (K),
-  NP (Nil, (:*)),
-  NS (S, Z),
-  SOP (SOP),
- )
-import Generics.SOP qualified as SOP
 import Plutarch.Builtin.Integer (PInteger)
 
 import Plutarch.Builtin.Opaque (popaque)
-import Plutarch.Internal.Lift (
-  LiftError (OtherLiftError),
-  PLiftable (AsHaskell, PlutusRepr, haskToRepr, plutToRepr, reprToHask, reprToPlut),
-  PLifted (PLifted),
-  pconstant,
- )
-import Plutarch.Internal.PlutusType (
-  PContravariant',
-  PCovariant',
-  PInner,
-  PVariant',
-  PlutusType,
-  pcon',
-  pmatch',
- )
+import Plutarch.Internal.Lift (LiftError (OtherLiftError),
+                               PLiftable (AsHaskell, PlutusRepr, haskToRepr, plutToRepr, reprToHask, reprToPlut),
+                               PLifted (PLifted), pconstant)
+import Plutarch.Internal.PlutusType (PContravariant', PCovariant', PInner,
+                                     PVariant', PlutusType, pcon', pmatch')
 import Plutarch.Internal.Term (S, Term)
 import Plutarch.Repr.Internal (groupHandlers)
 import Plutarch.Repr.Newtype (DeriveNewtypePlutusType (DeriveNewtypePlutusType))

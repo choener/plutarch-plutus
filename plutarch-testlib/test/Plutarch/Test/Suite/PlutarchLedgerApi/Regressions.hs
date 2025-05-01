@@ -3,12 +3,9 @@ module Plutarch.Test.Suite.PlutarchLedgerApi.Regressions (tests) where
 import Plutarch.LedgerApi.Interval (PInterval, pcontains)
 import Plutarch.LedgerApi.V1 (PPosixTime)
 import Plutarch.Prelude (pconstant, plift, (#))
-import PlutusLedgerApi.V1.Interval (
-  Extended (Finite),
-  Interval (Interval),
-  LowerBound (LowerBound),
-  UpperBound (UpperBound),
- )
+import PlutusLedgerApi.V1.Interval (Extended (Finite), Interval (Interval),
+                                    LowerBound (LowerBound),
+                                    UpperBound (UpperBound))
 import PlutusLedgerApi.V1.Interval qualified as Interval
 import PlutusLedgerApi.V1.Time (POSIXTime)
 import Test.Tasty (TestTree)

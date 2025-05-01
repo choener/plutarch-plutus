@@ -1,5 +1,4 @@
-{ pkgs }:
-{
+{ pkgs }: {
   plutarch = {
     "1.4.0" = {
       timestamp = "2024-01-16T11:00:00Z";

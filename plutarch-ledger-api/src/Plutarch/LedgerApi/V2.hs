@@ -69,8 +69,8 @@ module Plutarch.LedgerApi.V2 (
   Utils.prationalFromData,
 ) where
 
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.LedgerApi.AssocMap qualified as AssocMap
 import Plutarch.LedgerApi.Interval qualified as Interval
 import Plutarch.LedgerApi.Utils qualified as Utils

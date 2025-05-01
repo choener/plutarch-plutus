@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RankNTypes      #-}
 {-# LANGUAGE RoleAnnotations #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
@@ -67,8 +67,8 @@ module Plutarch.LedgerApi.Value (
 
 import Data.ByteString (ByteString)
 import Data.Kind (Type)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.LedgerApi.AssocMap qualified as AssocMap
 import Plutarch.Prelude hiding (psingleton)
 import Plutarch.Prelude qualified as PPrelude

@@ -10,14 +10,9 @@ import PlutusLedgerApi.V1.Orphans.Tx ()
 import PlutusLedgerApi.V1.Orphans.Value qualified as Value
 import PlutusLedgerApi.V2 qualified as PLA
 import PlutusLedgerApi.V2.Orphans.Tx ()
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  NonEmptyList (NonEmpty),
-  functionMap,
-  getNonEmpty,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        CoArbitrary (coarbitrary), Function (function),
+                        NonEmptyList (NonEmpty), functionMap, getNonEmpty)
 
 -- | @since 1.0.2
 instance Arbitrary PLA.TxInInfo where

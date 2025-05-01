@@ -6,17 +6,10 @@ import Data.Word (Word32)
 import PlutusLedgerApi.V1 qualified as PLA
 import PlutusLedgerApi.V1.Interval qualified as Interval
 import PlutusLedgerApi.V1.Orphans.Time ()
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  Arbitrary1 (liftArbitrary, liftShrink),
-  CoArbitrary (coarbitrary),
-  Function (function),
-  frequency,
-  functionMap,
-  getNonNegative,
-  oneof,
-  variant,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        Arbitrary1 (liftArbitrary, liftShrink),
+                        CoArbitrary (coarbitrary), Function (function),
+                        frequency, functionMap, getNonNegative, oneof, variant)
 
 {- | This instance does not bias the constructor choice: it is equally likely to
 produce 'PLA.Finite', 'PLA.NegInf' and 'PLA.PosInf'. Bear this in mind when

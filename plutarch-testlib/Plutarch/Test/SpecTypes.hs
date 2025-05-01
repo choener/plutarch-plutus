@@ -1,12 +1,12 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell      #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | Dummy types used in tests
 module Plutarch.Test.SpecTypes (Triplet (..), PTriplet (..)) where
 
 import Data.Kind (Type)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Prelude
 import PlutusTx qualified
 import Prettyprinter (Pretty (pretty), (<+>))

@@ -4,12 +4,8 @@ module PlutusLedgerApi.V1.Orphans.Time () where
 
 import Data.Coerce (coerce)
 import PlutusLedgerApi.V1 qualified as PLA
-import Test.QuickCheck (
-  Arbitrary,
-  CoArbitrary,
-  Function (function),
-  functionMap,
- )
+import Test.QuickCheck (Arbitrary, CoArbitrary, Function (function),
+                        functionMap)
 
 -- | @since 1.0.0
 deriving via Integer instance Arbitrary PLA.POSIXTime

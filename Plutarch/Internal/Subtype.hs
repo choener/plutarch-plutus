@@ -11,16 +11,10 @@ module Plutarch.Internal.Subtype (
 
 import Data.Kind (Constraint)
 import Data.Proxy (Proxy (Proxy))
-import GHC.TypeError (
-  ErrorMessage (ShowType, Text, (:<>:)),
-  TypeError,
- )
+import GHC.TypeError (ErrorMessage (ShowType, Text, (:<>:)), TypeError)
 
-import Plutarch.Internal.PlutusType (
-  PContravariant,
-  PCovariant,
-  PlutusType (PInner),
- )
+import Plutarch.Internal.PlutusType (PContravariant, PCovariant,
+                                     PlutusType (PInner))
 import Plutarch.Internal.Term (PType, Term, punsafeCoerce)
 import Plutarch.Internal.Witness (witness)
 

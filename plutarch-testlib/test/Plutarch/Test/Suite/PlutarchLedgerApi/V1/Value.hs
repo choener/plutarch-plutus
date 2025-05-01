@@ -2,7 +2,8 @@ module Plutarch.Test.Suite.PlutarchLedgerApi.V1.Value (tests) where
 
 import Plutarch.Internal.Term (punsafeCoerce)
 import Plutarch.LedgerApi.AssocMap (KeyGuarantees (Sorted, Unsorted))
-import Plutarch.LedgerApi.Value (AmountGuarantees (NoGuarantees, NonZero, Positive), PValue)
+import Plutarch.LedgerApi.Value (AmountGuarantees (NoGuarantees, NonZero, Positive),
+                                 PValue)
 import Plutarch.LedgerApi.Value qualified as PValue
 import Plutarch.Prelude
 import Plutarch.Test.Laws (checkLedgerPropertiesValue)

@@ -5,8 +5,8 @@ module Plutarch.LedgerApi.V1.DCert (
   PDCert (..),
 ) where
 
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.LedgerApi.V1.Credential (PStakingCredential)
 import Plutarch.LedgerApi.V1.Crypto (PPubKeyHash)
 import Plutarch.Prelude

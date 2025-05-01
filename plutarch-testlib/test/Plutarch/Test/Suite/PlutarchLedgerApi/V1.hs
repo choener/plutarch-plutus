@@ -4,15 +4,11 @@ import Data.Kind (Type)
 import Plutarch.LedgerApi.V1 qualified as PLA
 import Plutarch.LedgerApi.Value qualified as Value
 import Plutarch.Prelude
-import Plutarch.Test.Laws (
-  checkHaskellOrdEquivalent,
-  checkLedgerProperties,
-  checkLedgerPropertiesPCountable,
-  checkLedgerPropertiesPEnumerable,
-  checkPAdditiveGroupLaws,
-  checkPAdditiveMonoidLaws,
-  checkPAdditiveSemigroupLaws,
- )
+import Plutarch.Test.Laws (checkHaskellOrdEquivalent, checkLedgerProperties,
+                           checkLedgerPropertiesPCountable,
+                           checkLedgerPropertiesPEnumerable,
+                           checkPAdditiveGroupLaws, checkPAdditiveMonoidLaws,
+                           checkPAdditiveSemigroupLaws)
 import Plutarch.Test.Suite.PlutarchLedgerApi.V1.Interval qualified as Interval
 import Plutarch.Test.Suite.PlutarchLedgerApi.V1.Value qualified as Value
 import Plutarch.Test.Utils (fewerTests, typeName)

@@ -23,27 +23,13 @@ import PlutusLedgerApi.V1.Value qualified as Value
 import PlutusTx.AssocMap qualified as AssocMap
 import PlutusTx.Prelude qualified as PlutusTx
 import Prettyprinter (Pretty)
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  Arbitrary1 (liftArbitrary, liftShrink),
-  CoArbitrary,
-  Function (function),
-  Gen,
-  NonEmptyList (NonEmpty),
-  NonZero (NonZero),
-  Positive (Positive),
-  chooseBoundedIntegral,
-  chooseInt,
-  frequency,
-  functionMap,
-  getNonEmpty,
-  getNonZero,
-  getPositive,
-  resize,
-  scale,
-  sized,
-  vectorOf,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink),
+                        Arbitrary1 (liftArbitrary, liftShrink), CoArbitrary,
+                        Function (function), Gen, NonEmptyList (NonEmpty),
+                        NonZero (NonZero), Positive (Positive),
+                        chooseBoundedIntegral, chooseInt, frequency,
+                        functionMap, getNonEmpty, getNonZero, getPositive,
+                        resize, scale, sized, vectorOf)
 
 -- | @since 1.1.0
 deriving via (Value.CurrencySymbol, Value.TokenName) instance Arbitrary Value.AssetClass

@@ -1,7 +1,7 @@
 {-
 BuiltinPair and BuiltinList should go into their own module !!
 -}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Plutarch.Builtin.Data (
@@ -34,7 +34,8 @@ import Plutarch.Builtin.Bool (PBool)
 import Plutarch.Builtin.ByteString (PByteString)
 import Plutarch.Builtin.Integer (PInteger)
 
-import Plutarch.Internal.Term (S, Term, pforce, phoistAcyclic, punsafeBuiltin, (:-->))
+import Plutarch.Internal.Term (S, Term, pforce, phoistAcyclic, punsafeBuiltin,
+                               (:-->))
 import PlutusCore qualified as PLC
 
 newtype PData (s :: S) = PData (Term s PData)

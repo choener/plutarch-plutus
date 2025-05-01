@@ -1,5 +1,5 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances       #-}
+{-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
 module Plutarch.Internal.TryFrom (
@@ -19,52 +19,21 @@ import Data.Functor.Const (Const)
 import GHC.Generics (Generic)
 import Plutarch.Builtin.Bool (PBool, pif, (#||))
 import Plutarch.Builtin.ByteString (PByteString)
-import Plutarch.Builtin.Data (
-  PAsData,
-  PBuiltinList,
-  PBuiltinPair,
-  PData,
-  pasByteStr,
-  pasConstr,
-  pasInt,
-  pasList,
-  pfstBuiltin,
-  ppairDataBuiltin,
-  psndBuiltin,
- )
-import Plutarch.Builtin.Integer (
-  PInteger,
-  pconstantInteger,
-  peqInteger,
- )
+import Plutarch.Builtin.Data (PAsData, PBuiltinList, PBuiltinPair, PData,
+                              pasByteStr, pasConstr, pasInt, pasList,
+                              pfstBuiltin, ppairDataBuiltin, psndBuiltin)
+import Plutarch.Builtin.Integer (PInteger, pconstantInteger, peqInteger)
 import Plutarch.Builtin.String (ptraceInfo)
-import Plutarch.Internal.IsData (
-  PIsData,
-  pdata,
-  pforgetData,
-  pfromData,
- )
+import Plutarch.Internal.IsData (PIsData, pdata, pforgetData, pfromData)
 import Plutarch.Internal.ListLike (PListLike (pnull), pmap)
 import Plutarch.Internal.Numeric (PPositive, ptryPositive)
 import Plutarch.Internal.PLam (PLamN (plam))
 import Plutarch.Internal.PlutusType (PInner)
-import Plutarch.Internal.Subtype (
-  PSubtype,
-  PSubtype',
-  PSubtypeRelation (PNoSubtypeRelation, PSubtypeRelation),
-  pdowncastF,
-  pupcast,
-  pupcastF,
- )
-import Plutarch.Internal.Term (
-  PType,
-  Term,
-  perror,
-  plet,
-  punsafeCoerce,
-  (#),
-  type (:-->),
- )
+import Plutarch.Internal.Subtype (PSubtype, PSubtype',
+                                  PSubtypeRelation (PNoSubtypeRelation, PSubtypeRelation),
+                                  pdowncastF, pupcast, pupcastF)
+import Plutarch.Internal.Term (PType, Term, perror, plet, punsafeCoerce,
+                               type (:-->), (#))
 import Plutarch.Internal.TermCont (runTermCont, tcont, unTermCont)
 import Plutarch.Reducible (Reduce)
 

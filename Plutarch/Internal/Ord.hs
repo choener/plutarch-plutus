@@ -5,37 +5,16 @@ module Plutarch.Internal.Ord (
 ) where
 
 import Data.Kind (Type)
-import Plutarch.Builtin.Bool (
-  PBool,
-  pand',
-  pfalse,
-  pif',
-  por',
-  ptrue,
- )
-import Plutarch.Builtin.ByteString (
-  PByte,
-  PByteString,
-  PEndianness,
-  PLogicOpSemantics,
- )
-import Plutarch.Builtin.Integer (
-  PInteger,
-  pleInteger,
-  pltInteger,
- )
+import Plutarch.Builtin.Bool (PBool, pand', pfalse, pif', por', ptrue)
+import Plutarch.Builtin.ByteString (PByte, PByteString, PEndianness,
+                                    PLogicOpSemantics)
+import Plutarch.Builtin.Integer (PInteger, pleInteger, pltInteger)
 import Plutarch.Builtin.Unit (PUnit)
 import Plutarch.Internal.Eq (PEq)
 import Plutarch.Internal.Lift (pconstant)
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PlutusType (PInner)
-import Plutarch.Internal.Term (
-  S,
-  Term,
-  plet,
-  punsafeBuiltin,
-  (#),
- )
+import Plutarch.Internal.Term (S, Term, plet, punsafeBuiltin, (#))
 import PlutusCore qualified as PLC
 
 {- | Total ordering relation.

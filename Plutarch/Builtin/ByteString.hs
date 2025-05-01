@@ -29,23 +29,16 @@ module Plutarch.Builtin.ByteString (
 import Data.ByteString qualified as BS
 import Data.Char (toLower)
 import Data.Word (Word8)
+import Generics.SOP qualified as SOP
 import GHC.Generics (Generic)
 import GHC.Stack (HasCallStack)
-import Generics.SOP qualified as SOP
 import Plutarch.Builtin.Bool (PBool, pfalse, ptrue)
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Builtin.Opaque (POpaque)
 import {-# SOURCE #-} Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.Term (
-  S,
-  Term,
-  phoistAcyclic,
-  punsafeBuiltin,
-  punsafeCoerce,
-  punsafeConstantInternal,
-  (#),
-  (:-->),
- )
+import Plutarch.Internal.Term (S, Term, phoistAcyclic, punsafeBuiltin,
+                               punsafeCoerce, punsafeConstantInternal, (#),
+                               (:-->))
 import PlutusCore qualified as PLC
 
 -- | Plutus 'BuiltinByteString'

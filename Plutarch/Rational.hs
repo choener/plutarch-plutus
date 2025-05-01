@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Plutarch.Rational (
@@ -12,70 +12,37 @@ module Plutarch.Rational (
   pproperFraction,
 ) where
 
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Builtin.Bool (PBool, pcond, pif)
 import Plutarch.Builtin.Data (PAsData, PBuiltinList, PData)
 import Plutarch.Builtin.Integer (PInteger)
 import Plutarch.Internal.Eq (PEq ((#==)))
 import Plutarch.Internal.Fix (pfix)
-import Plutarch.Internal.Lift (
-  PLiftable (
-    AsHaskell,
-    PlutusRepr,
-    haskToRepr,
-    plutToRepr,
-    reprToHask,
-    reprToPlut
-  ),
-  PLiftedClosed,
-  getPLiftedClosed,
-  mkPLifted,
-  mkPLiftedClosed,
-  pconstant,
-  pliftedFromClosed,
-  pliftedToClosed,
- )
+import Plutarch.Internal.Lift (PLiftable (AsHaskell, PlutusRepr, haskToRepr, plutToRepr, reprToHask, reprToPlut),
+                               PLiftedClosed, getPLiftedClosed, mkPLifted,
+                               mkPLiftedClosed, pconstant, pliftedFromClosed,
+                               pliftedToClosed)
 import Plutarch.Internal.ListLike (phead, pnil, ptail)
-import Plutarch.Internal.Numeric (
-  PAdditiveGroup (pnegate, pscaleInteger, (#-)),
-  PAdditiveMonoid (pscaleNatural, pzero),
-  PAdditiveSemigroup (pscalePositive, (#+)),
-  PIntegralDomain (pabs, psignum),
-  PMultiplicativeMonoid (pone, ppowNatural),
-  PMultiplicativeSemigroup (ppowPositive, (#*)),
-  PPositive,
-  PRing (pfromInteger),
-  pdiv,
-  pmod,
-  positiveToInteger,
-  pquot,
-  ptryPositive,
-  toPositiveAbs,
- )
-import Plutarch.Internal.Ord (
-  POrd ((#<), (#<=)),
- )
+import Plutarch.Internal.Numeric (PAdditiveGroup (pnegate, pscaleInteger, (#-)),
+                                  PAdditiveMonoid (pscaleNatural, pzero),
+                                  PAdditiveSemigroup (pscalePositive, (#+)),
+                                  PIntegralDomain (pabs, psignum),
+                                  PMultiplicativeMonoid (pone, ppowNatural),
+                                  PMultiplicativeSemigroup (ppowPositive, (#*)),
+                                  PPositive, PRing (pfromInteger), pdiv, pmod,
+                                  positiveToInteger, pquot, ptryPositive,
+                                  toPositiveAbs)
+import Plutarch.Internal.Ord (POrd ((#<), (#<=)))
 import Plutarch.Internal.Other (pto)
 import Plutarch.Internal.PLam (plam)
 import Plutarch.Internal.PlutusType (PlutusType, pcon, pmatch)
 import Plutarch.Internal.Show (PShow, pshow, pshow')
-import Plutarch.Internal.Term (
-  S,
-  Term,
-  phoistAcyclic,
-  plet,
-  punsafeBuiltin,
-  (#),
-  (#$),
-  (:-->),
- )
-import Plutarch.Internal.TermCont (
-  runTermCont,
-  tcont,
-  unTermCont,
- )
-import Plutarch.Internal.TryFrom (PTryFrom (PTryFromExcess, ptryFrom'), ptryFrom)
+import Plutarch.Internal.Term (S, Term, phoistAcyclic, plet, punsafeBuiltin,
+                               (#$), (#), (:-->))
+import Plutarch.Internal.TermCont (runTermCont, tcont, unTermCont)
+import Plutarch.Internal.TryFrom (PTryFrom (PTryFromExcess, ptryFrom'),
+                                  ptryFrom)
 import Plutarch.Pair (PPair (PPair))
 import Plutarch.Repr.SOP (DeriveAsSOPRec (DeriveAsSOPRec))
 import Plutarch.Trace (ptraceInfoError)

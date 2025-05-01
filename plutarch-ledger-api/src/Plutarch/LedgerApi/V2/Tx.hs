@@ -6,8 +6,8 @@ module Plutarch.LedgerApi.V2.Tx (
   PTxOut (..),
 ) where
 
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.LedgerApi.AssocMap qualified as AssocMap
 import Plutarch.LedgerApi.Utils (PMaybeData)
 import Plutarch.LedgerApi.V1.Address (PAddress)

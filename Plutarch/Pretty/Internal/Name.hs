@@ -3,11 +3,7 @@
 module Plutarch.Pretty.Internal.Name (smartName, freshVarName) where
 
 import Control.Monad.Reader (ask)
-import Control.Monad.State (
-  get,
-  lift,
-  modify',
- )
+import Control.Monad.State (get, lift, modify')
 import Data.Functor (($>))
 import Data.Set qualified as Set
 import Data.Text (Text)
@@ -17,20 +13,14 @@ import Data.Traversable (for)
 import System.Random.Stateful (randomRM, uniformRM)
 
 import PlutusCore qualified as PLC
-import UntypedPlutusCore (
-  DeBruijn (DeBruijn),
-  DefaultFun,
-  Term (Builtin, Force, Var),
- )
+import UntypedPlutusCore (DeBruijn (DeBruijn), DefaultFun,
+                          Term (Builtin, Force, Var))
 
 import Plutarch.Pretty.Internal.Config (forcedPrefix, keywords)
 import Plutarch.Pretty.Internal.TermUtils (pattern ComposeAST, pattern PFixAst)
-import Plutarch.Pretty.Internal.Types (
-  PrettyMonad,
-  PrettyState (PrettyState, ps'nameMap, ps'names),
-  builtinFunAtRef,
-  memorizeName,
- )
+import Plutarch.Pretty.Internal.Types (PrettyMonad,
+                                       PrettyState (PrettyState, ps'nameMap, ps'names),
+                                       builtinFunAtRef, memorizeName)
 
 smartName :: Term DeBruijn uni DefaultFun () -> PrettyMonad s Text
 smartName uplc = do

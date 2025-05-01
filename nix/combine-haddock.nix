@@ -1,34 +1,23 @@
 { pkgs, lib, ... }:
-{ cabalProject
-, prologue ? "= Combined Haddock"
-, targetPackages
-}:
+{ cabalProject, prologue ? "= Combined Haddock", targetPackages }:
 let
 
   # Haskell packages to make documentation for. Only those with a "doc" output will be used.
   # Note: we do not provide arbitrary additional Haddock options, as these would not be
   # applied consistently, since we're reusing the already built Haddock for the packages.
-  hsPkgs =
-    lib.attrValues (
-      pkgs.haskell-nix.haskellLib.collectComponents' "library" (
-        pkgs.haskell-nix.haskellLib.selectProjectPackages cabalProject.hsPkgs
-        //
-        (
-          lib.filterAttrs
-            (name: _: lib.any (x: builtins.match "(${x})-.*$" name == [ x ]) targetPackages)
-            cabalProject.hsPkgs
-        )
-      )
-    );
-
+  hsPkgs = lib.attrValues
+    (pkgs.haskell-nix.haskellLib.collectComponents' "library"
+      (pkgs.haskell-nix.haskellLib.selectProjectPackages cabalProject.hsPkgs
+        // (lib.filterAttrs (name: _:
+          lib.any (x: builtins.match "(${x})-.*$" name == [ x ]) targetPackages)
+          cabalProject.hsPkgs)));
 
   hsPkgs-docs = map (x: x.doc) (lib.filter (x: x ? doc) hsPkgs);
 
-  prologueFile =
-    pkgs.writeTextFile {
-      name = "prologue";
-      text = prologue;
-    };
+  prologueFile = pkgs.writeTextFile {
+    name = "prologue";
+    text = prologue;
+  };
 
   the-mighty-command = ''
     hsdocsRec="$(cat graph* | grep -F /nix/store | sort | uniq)"
@@ -110,7 +99,6 @@ let
     echo "Done Combining Haddock"
   '';
 
-
   command-args = {
     buildInputs = [ hsPkgs-docs ];
 
@@ -119,11 +107,10 @@ let
     # us to resolve hyperlinks to haddocks elsewhere in the store.
     #
     # See also https://nixos.org/manual/nix/stable/expressions/advanced-attributes.html#adv-attr-exportReferencesGraph # editorconfig-checker-disable-line
-    exportReferencesGraph =
-      lib.concatLists
-        (lib.imap0 (i: pkg: [ "graph-${toString i}" pkg ]) hsPkgs-docs);
+    exportReferencesGraph = lib.concatLists
+      (lib.imap0 (i: pkg: [ "graph-${toString i}" pkg ]) hsPkgs-docs);
   };
 
-  combined-haddock = pkgs.runCommand "combine-haddock" command-args the-mighty-command;
-in
-combined-haddock
+  combined-haddock =
+    pkgs.runCommand "combine-haddock" command-args the-mighty-command;
+in combined-haddock

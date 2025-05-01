@@ -15,14 +15,8 @@ module Plutarch.Evaluate (
 import Control.Lens.Combinators (over)
 import Data.Text (Text)
 import Plutarch.Internal.Evaluate qualified as E
-import Plutarch.Internal.Term (
-  ClosedTerm,
-  Config,
-  RawTerm (RCompiled),
-  Term (..),
-  TermResult (TermResult),
-  compile,
- )
+import Plutarch.Internal.Term (ClosedTerm, Config, RawTerm (RCompiled),
+                               Term (..), TermResult (TermResult), compile)
 import Plutarch.Script (Script (Script))
 import PlutusCore.Evaluation.Machine.ExBudget (ExBudget)
 import PlutusCore.MkPlc (mkConstant, mkIterAppNoAnn)

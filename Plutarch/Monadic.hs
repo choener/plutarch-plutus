@@ -3,12 +3,8 @@
 module Plutarch.Monadic ((>>=), (>>), fail) where
 
 import Data.String (fromString)
-import Plutarch.Internal.Term (
-  Config (Tracing),
-  Term,
-  TracingMode (DetTracing),
-  pgetConfig,
- )
+import Plutarch.Internal.Term (Config (Tracing), Term, TracingMode (DetTracing),
+                               pgetConfig)
 import Plutarch.Trace (ptraceInfoError)
 import Prelude hiding (fail, (>>), (>>=))
 

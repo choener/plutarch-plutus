@@ -6,8 +6,8 @@ module Plutarch.LedgerApi.V3.Tx (
 ) where
 
 import Data.ByteString (ByteString)
-import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
+import GHC.Generics (Generic)
 import Plutarch.Prelude
 import PlutusLedgerApi.V3 qualified as Plutus
 import PlutusTx.Builtins.Internal qualified as PlutusTx

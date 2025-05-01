@@ -21,14 +21,8 @@ import Data.Text qualified as Text
 import Data.Text.Encoding qualified as Encoding
 import Plutarch.Evaluate (EvalError, evalScript)
 import Plutarch.Internal.Other (printScript)
-import Plutarch.Internal.Term (
-  ClosedTerm,
-  Config (Tracing),
-  LogLevel (LogInfo),
-  Script,
-  TracingMode (DetTracing),
-  compile,
- )
+import Plutarch.Internal.Term (ClosedTerm, Config (Tracing), LogLevel (LogInfo),
+                               Script, TracingMode (DetTracing), compile)
 import Plutarch.Script (Script (unScript))
 import PlutusLedgerApi.Common (serialiseUPLC)
 import PlutusLedgerApi.V1 (ExBudget (ExBudget), ExCPU, ExMemory)

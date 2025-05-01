@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
@@ -10,25 +10,14 @@ import Data.Kind (Type)
 import GHC.Generics (Generic)
 import Plutarch.Builtin.Data (PAsData, PData)
 import Plutarch.Internal.Eq (PEq ((#==)))
-import Plutarch.Internal.IsData (
-  PIsData,
-  pdataImpl,
-  pforgetData,
-  pfromData,
-  pfromDataImpl,
- )
+import Plutarch.Internal.IsData (PIsData, pdataImpl, pforgetData, pfromData,
+                                 pfromDataImpl)
 import Plutarch.Internal.Ord (POrd ((#<), (#<=)))
 import Plutarch.Internal.Other (pto)
-import Plutarch.Internal.PlutusType (
-  PInner,
-  PlutusType (pcon', pmatch'),
-  pmatch,
- )
+import Plutarch.Internal.PlutusType (PInner, PlutusType (pcon', pmatch'),
+                                     pmatch)
 import Plutarch.Internal.Show (PShow (pshow'))
-import Plutarch.Internal.Term (
-  S,
-  Term,
- )
+import Plutarch.Internal.Term (S, Term)
 import Plutarch.Internal.TryFrom (PTryFrom)
 import Plutarch.Unsafe (punsafeCoerce)
 

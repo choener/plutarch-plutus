@@ -24,18 +24,9 @@ module Plutarch.Builtin.Bool (
 
 import Data.Kind (Type)
 import {-# SOURCE #-} Plutarch.Internal.PLam (plam)
-import Plutarch.Internal.Term (
-  PDelayed,
-  S,
-  Term,
-  pdelay,
-  pforce,
-  phoistAcyclic,
-  punsafeBuiltin,
-  punsafeConstantInternal,
-  (#),
-  (:-->),
- )
+import Plutarch.Internal.Term (PDelayed, S, Term, pdelay, pforce, phoistAcyclic,
+                               punsafeBuiltin, punsafeConstantInternal, (#),
+                               (:-->))
 import PlutusCore qualified as PLC
 
 {- | Builtin Plutus boolean.

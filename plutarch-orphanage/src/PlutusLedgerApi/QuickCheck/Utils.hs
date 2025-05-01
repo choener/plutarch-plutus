@@ -1,6 +1,6 @@
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RoleAnnotations #-}
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE ViewPatterns    #-}
 
 module PlutusLedgerApi.QuickCheck.Utils (
   SizedByteString (SizedByteString),
@@ -15,13 +15,8 @@ import Data.Coerce (coerce)
 import Data.Proxy (Proxy (Proxy))
 import Data.Word (Word64)
 import GHC.TypeNats (KnownNat, Natural, natVal)
-import Test.QuickCheck (
-  Arbitrary (arbitrary, shrink),
-  CoArbitrary,
-  Function (function),
-  functionMap,
-  vectorOf,
- )
+import Test.QuickCheck (Arbitrary (arbitrary, shrink), CoArbitrary,
+                        Function (function), functionMap, vectorOf)
 import Test.QuickCheck.Instances.ByteString ()
 
 {- | Helper for 'ByteString's of a fixed length. We don't expose the

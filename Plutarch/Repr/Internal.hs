@@ -1,5 +1,5 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances       #-}
+{-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 
 module Plutarch.Repr.Internal (
@@ -21,26 +21,11 @@ module Plutarch.Repr.Internal (
 import Data.Kind (Type)
 import Data.List (groupBy, sortBy)
 import Data.Proxy (Proxy (Proxy))
-import GHC.TypeError (ErrorMessage (Text), TypeError)
-import Generics.SOP (
-  All,
-  All2,
-  AllZipN,
-  Code,
-  I,
-  K (K),
-  LiftedCoercible,
-  NP (Nil, (:*)),
-  NS (S, Z),
-  Prod,
-  SListI,
-  SOP (SOP),
-  ccompare_SOP,
-  hcliftA2,
-  hcollapse,
-  para_SList,
- )
+import Generics.SOP (All, All2, AllZipN, Code, I, K (K), LiftedCoercible,
+                     NP (Nil, (:*)), NS (S, Z), Prod, SListI, SOP (SOP),
+                     ccompare_SOP, hcliftA2, hcollapse, para_SList)
 import Generics.SOP qualified as SOP
+import GHC.TypeError (ErrorMessage (Text), TypeError)
 import Plutarch.Builtin.Bool (PBool, pif)
 import Plutarch.Builtin.Integer (PInteger, pconstantInteger)
 import Plutarch.Internal.Eq (PEq, (#==))

@@ -1,39 +1,20 @@
 module Plutarch.Test.Suite.PlutarchLedgerApi.V1.Interval (tests) where
 
-import Plutarch.LedgerApi.Interval (
-  PInterval,
-  pafter,
-  palways,
-  pbefore,
-  pcontains,
-  pfrom,
-  phull,
-  pintersection,
-  pinterval,
-  pisEmpty,
-  pmember,
-  psingleton,
-  pto,
- )
+import Plutarch.LedgerApi.Interval (PInterval, pafter, palways, pbefore,
+                                    pcontains, pfrom, phull, pintersection,
+                                    pinterval, pisEmpty, pmember, psingleton,
+                                    pto)
 import Plutarch.LedgerApi.V1 (PPosixTime)
 import Plutarch.Prelude hiding (psingleton, pto)
 import Plutarch.Test.Golden (goldenEval, goldenGroup, plutarchGolden)
 import Plutarch.Test.Laws (checkLedgerProperties)
-import Plutarch.Test.QuickCheck (checkHaskellEquivalent, checkHaskellEquivalent2)
+import Plutarch.Test.QuickCheck (checkHaskellEquivalent,
+                                 checkHaskellEquivalent2)
 import Plutarch.Test.Utils (fewerTests, precompileTerm)
 import PlutusLedgerApi.V1 (POSIXTime)
-import PlutusLedgerApi.V1.Interval (
-  after,
-  before,
-  contains,
-  from,
-  hull,
-  intersection,
-  isEmpty,
-  member,
-  singleton,
-  to,
- )
+import PlutusLedgerApi.V1.Interval (after, before, contains, from, hull,
+                                    intersection, isEmpty, member, singleton,
+                                    to)
 import Test.Tasty (TestTree, adjustOption, testGroup)
 import Test.Tasty.QuickCheck (arbitrary, forAllShrinkShow, shrink, testProperty)
 

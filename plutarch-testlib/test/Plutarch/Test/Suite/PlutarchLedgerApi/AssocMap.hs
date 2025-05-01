@@ -8,7 +8,8 @@ import Plutarch.LedgerApi.Utils (pmaybeToMaybeData)
 import Plutarch.Maybe (pjust, pmapMaybe, pnothing)
 import Plutarch.Prelude
 import Plutarch.Test.Laws (checkLedgerPropertiesAssocMap)
-import Plutarch.Test.QuickCheck (checkHaskellEquivalent2, propEval, propEvalEqual)
+import Plutarch.Test.QuickCheck (checkHaskellEquivalent2, propEval,
+                                 propEvalEqual)
 import Plutarch.Test.Unit (testEvalEqual)
 import Plutarch.Test.Utils (fewerTests, prettyEquals, prettyShow)
 import Plutarch.Unsafe (punsafeCoerce)

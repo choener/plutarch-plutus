@@ -934,7 +934,7 @@ compile' t = {-# SCC "compile'" #-}
           (HM.HashMap HoistedTerm Word64, [(Word64, RawTerm)], Word64) ->
           (HM.HashMap HoistedTerm Word64, [(Word64, RawTerm)], Word64)
       g hoistedTerm@(HoistedTerm _ _ term) (m, defs, n) = {-# SCC "compile'gg" #-} case HM.lookup hoistedTerm m of
-        Nothing -> (m, (n, term) : defs, n+1)
+        Nothing -> (HM.insert hoistedTerm n m, (n, term) : defs, n+1)
         Just w64 -> (m, defs, n)
 
       toInline :: HM.HashMap HoistedTerm Int

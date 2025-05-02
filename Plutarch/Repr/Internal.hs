@@ -99,7 +99,7 @@ groupHandlers handlers idx = unTermCont $ do
     traverse (\(i, t) -> (\hash -> (i, (t, hash))) <$> hashOpenTerm t) handlers
 
   let
-#ifdef OLDCMP
+#ifdef CMPOLD
     handlersWithHashOld = map (second (second fst)) handlersWithHash
     -- old way of getting them
     groupedHandlersOld :: [([Integer], Term s b)]

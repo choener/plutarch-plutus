@@ -2,6 +2,8 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 {-# OPTIONS_GHC -Wno-unused-imports #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
 
 module Plutarch.Internal.Term (
   -- | \$hoisted
@@ -781,11 +783,16 @@ phoistAcyclic t = pgetConfig $ \cfg -> Term \_ ->
   asRawTerm t 0 >>= \case
     -- Built-ins are smaller than variable references
     t'@(getTerm -> RBuiltin _) -> pure t'
+    {-
     t' -> case evalScript . Script . UPLC.Program () uplcVersion $ compile' cfg t' of
       (Right _, _, _) ->
         let hoisted = HoistedTerm (hashRawTerm $ getTerm t') (hash $ getTerm t') (getTerm t')
          in pure $ TermResult (RHoisted hoisted) (hoisted : getDeps t')
       (Left e, _, _) -> pthrow' $ "Hoisted term errs! " <> fromString (show e)
+    -}
+    t' ->
+        let hoisted = HoistedTerm (hashRawTerm $ getTerm t') (hash $ getTerm t') (getTerm t')
+         in pure $ TermResult (RHoisted hoisted) (hoisted : getDeps t')
 
 -- Couldn't find a definition for this in plutus-core
 subst :: Word64 -> (Word64 -> UTerm) -> UTerm -> UTerm

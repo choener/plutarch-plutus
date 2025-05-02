@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances       #-}
 {-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 
 module Plutarch.Repr.Internal (
   RecAsHaskell,
@@ -98,8 +99,8 @@ groupHandlers handlers idx = unTermCont $ do
     traverse (\(i, t) -> (\hash -> (i, (t, hash))) <$> hashOpenTerm t) handlers
 
   let
+#ifdef OLDCMP
     handlersWithHashOld = map (second (second fst)) handlersWithHash
-    handlersWithHashNew = map (second (second snd)) handlersWithHash
     -- old way of getting them
     groupedHandlersOld :: [([Integer], Term s b)]
     groupedHandlersOld =
@@ -108,6 +109,8 @@ groupHandlers handlers idx = unTermCont $ do
           <$> groupBy
             (\x1 x2 -> snd (snd x1) == snd (snd x2))
             (sortBy (\(_, (_, h1)) (_, (_, h2)) -> h1 `compare` h2) handlersWithHashOld)
+#endif
+    handlersWithHashNew = map (second (second snd)) handlersWithHash
     groupedHandlersNew :: [([Integer], Term s b)]
     groupedHandlersNew
       = sortBy (comparing (length . fst))

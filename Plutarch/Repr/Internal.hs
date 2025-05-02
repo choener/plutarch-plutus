@@ -19,7 +19,7 @@ module Plutarch.Repr.Internal (
 ) where
 
 import Data.Kind (Type)
-import Data.List (groupBy, sortBy)
+import Data.List (groupBy, sortBy, sort)
 import Data.Proxy (Proxy (Proxy))
 import Generics.SOP (All, All2, AllZipN, Code, I, K (K), LiftedCoercible,
                      NP (Nil, (:*)), NS (S, Z), Prod, SListI, SOP (SOP),
@@ -30,8 +30,12 @@ import Plutarch.Builtin.Bool (PBool, pif)
 import Plutarch.Builtin.Integer (PInteger, pconstantInteger)
 import Plutarch.Internal.Eq (PEq, (#==))
 import Plutarch.Internal.Lift (AsHaskell, pconstant)
-import Plutarch.Internal.Term (Dig, S, Term, plet)
+import Plutarch.Internal.Term (Dig, S, Term, plet, RawTerm)
 import Plutarch.Internal.TermCont (hashOpenTerm, unTermCont)
+import Data.Hashable (Hashed)
+import Data.Bifunctor (second)
+import qualified Data.HashMap.Strict as HM
+import Data.Ord (comparing)
 
 -- | @since 1.10.0
 newtype PStruct (struct :: [[S -> Type]]) (s :: S) = PStruct
@@ -90,17 +94,36 @@ gstructEq x y =
 -}
 groupHandlers :: forall (s :: S) (r :: S -> Type). [(Integer, Term s r)] -> Term s PInteger -> Term s r
 groupHandlers handlers idx = unTermCont $ do
-  handlersWithHash :: [(Integer, (Term s b, Dig))] <-
+  handlersWithHash :: [(Integer, (Term s b, (Dig, Hashed RawTerm)))] <-
     traverse (\(i, t) -> (\hash -> (i, (t, hash))) <$> hashOpenTerm t) handlers
 
   let
-    groupedHandlers :: [([Integer], Term s b)]
-    groupedHandlers =
+    handlersWithHashOld = map (second (second fst)) handlersWithHash
+    handlersWithHashNew = map (second (second snd)) handlersWithHash
+    -- old way of getting them
+    groupedHandlersOld :: [([Integer], Term s b)]
+    groupedHandlersOld =
       sortBy (\g1 g2 -> length (fst g1) `compare` length (fst g2)) $
         (\g -> (fst <$> g, fst $ snd $ head g))
           <$> groupBy
             (\x1 x2 -> snd (snd x1) == snd (snd x2))
-            (sortBy (\(_, (_, h1)) (_, (_, h2)) -> h1 `compare` h2) handlersWithHash)
+            (sortBy (\(_, (_, h1)) (_, (_, h2)) -> h1 `compare` h2) handlersWithHashOld)
+    groupedHandlersNew :: [([Integer], Term s b)]
+    groupedHandlersNew
+      = sortBy (comparing (length . fst))
+      . HM.elems
+      . HM.map (\xs -> (map fst xs, snd $ head xs))
+      . HM.fromListWith (flip (++))
+      $ [ (h,[(i,t)]) | (i,(t, h)) <- handlersWithHashNew ]
+    -- either compare and possibly error or use new way
+    groupedHandlers =
+#ifdef CMPOLD
+      if sort (map fst groupedHandlersOld) == sort (map fst groupedHandlersNew)
+      then groupedHandlersNew
+      else error $ "groupHandlers: " ++ show (map fst groupedHandlersNew, map fst groupedHandlersOld)
+#else
+      groupedHandlersNew
+#endif
 
   pure $
     let

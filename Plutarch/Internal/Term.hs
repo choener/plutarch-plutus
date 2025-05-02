@@ -175,7 +175,7 @@ instance Hashable RawTerm where
 addHashIndex :: forall alg. HashAlgorithm alg => Integer -> Context alg -> Context alg
 addHashIndex i = flip hashUpdate ((fromString $ show i) :: BS.ByteString)
 
-#ifdef OLDCMP
+#ifdef CMPOLD
 hashUTerm :: forall alg. HashAlgorithm alg => UTerm -> Context alg -> Context alg
 hashUTerm (UPLC.Var _ name) = addHashIndex 0 . flip hashUpdate (F.flat name)
 hashUTerm (UPLC.LamAbs _ name uterm) = addHashIndex 1 . flip hashUpdate (F.flat name) . hashUTerm uterm
@@ -210,7 +210,7 @@ hashRawTerm' (RCase x y) =
 #endif
 
 hashRawTerm :: RawTerm -> Dig
-#ifdef OLDCMP
+#ifdef CMPOLD
 hashRawTerm t = hashFinalize . hashRawTerm' t $ hashInit
 #else
 hashRawTerm _ = ()

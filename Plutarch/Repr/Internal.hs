@@ -122,7 +122,7 @@ groupHandlers handlers idx = unTermCont $ do
     -- either compare and possibly error or use new way
     groupedHandlers =
 #ifdef CMPOLD
-      if sort (map fst groupedHandlersOld) == sort (map fst groupedHandlersNew)
+      if sort (map (sort . fst) groupedHandlersOld) == sort (map (sort . fst) groupedHandlersNew)
       then groupedHandlersNew
       else error $ "groupHandlers: " ++ show (map fst groupedHandlersNew, map fst groupedHandlersOld)
 #else

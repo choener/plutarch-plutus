@@ -34,9 +34,9 @@ import Plutarch.Internal.Lift (AsHaskell, pconstant)
 import Plutarch.Internal.Term (Dig, S, Term, plet, RawTerm)
 import Plutarch.Internal.TermCont (hashOpenTerm, unTermCont)
 import Data.Hashable (Hashed)
-import Data.Bifunctor (second)
 import qualified Data.HashMap.Strict as HM
-import Data.Ord (comparing)
+import Data.Ord (comparing, Down (..))
+import Control.Arrow (Arrow(..))
 
 -- | @since 1.10.0
 newtype PStruct (struct :: [[S -> Type]]) (s :: S) = PStruct
@@ -113,7 +113,8 @@ groupHandlers handlers idx = unTermCont $ do
     handlersWithHashNew = map (second (second snd)) handlersWithHash
     groupedHandlersNew :: [([Integer], Term s b)]
     groupedHandlersNew
-      = sortBy (comparing (length . fst))
+      = sortBy (comparing ((length . fst) &&& fst))
+      . map (first (sortBy (comparing Down)))
       . HM.elems
       . HM.map (\xs -> (map fst xs, snd $ head xs))
       . HM.fromListWith (flip (++))

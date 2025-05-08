@@ -8,10 +8,21 @@ license:            MIT
 extra-source-files: README.md
 tested-with:        GHC ==9.6.6
 
+flag checkhoist
+  description: Enable compilation within phoist-acyclic
+  default:     False
+  manual:      True
+
+flag cmpold
+  description: Compare compiled code directly with old compilation
+  default:     False
+  manual:      True
+
 common c
   default-language:   GHC2021
   default-extensions:
     BlockArguments
+    CPP
     DataKinds
     DefaultSignatures
     DeriveAnyClass
@@ -72,6 +83,13 @@ common c
 
 library
   import:          c
+
+  if flag(cmpold)
+    cpp-options: -DCMPOLD
+
+  if flag(checkhoist)
+    cpp-options: -DCHECKHOIST
+
   exposed-modules:
     Plutarch.BitString
     Plutarch.Builtin
@@ -146,12 +164,14 @@ library
     , data-default
     , flat
     , generics-sop
+    , hashable
     , lens
     , mtl
-    , plutus-core        >=1.40.0.0 && <1.41
+    , plutus-core           >=1.40.0.0 && <1.41
     , plutus-ledger-api
     , plutus-tx
     , prettyprinter
     , QuickCheck
     , random
+    , unordered-containers
     , vector

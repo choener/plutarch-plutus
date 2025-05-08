@@ -1,6 +1,7 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances       #-}
+{-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 
 module Plutarch.Repr.Internal (
   RecAsHaskell,
@@ -19,34 +20,23 @@ module Plutarch.Repr.Internal (
 ) where
 
 import Data.Kind (Type)
-import Data.List (groupBy, sortBy)
+import Data.List (groupBy, sortBy, sort)
 import Data.Proxy (Proxy (Proxy))
-import GHC.TypeError (ErrorMessage (Text), TypeError)
-import Generics.SOP (
-  All,
-  All2,
-  AllZipN,
-  Code,
-  I,
-  K (K),
-  LiftedCoercible,
-  NP (Nil, (:*)),
-  NS (S, Z),
-  Prod,
-  SListI,
-  SOP (SOP),
-  ccompare_SOP,
-  hcliftA2,
-  hcollapse,
-  para_SList,
- )
+import Generics.SOP (All, All2, AllZipN, Code, I, K (K), LiftedCoercible,
+                     NP (Nil, (:*)), NS (S, Z), Prod, SListI, SOP (SOP),
+                     ccompare_SOP, hcliftA2, hcollapse, para_SList)
 import Generics.SOP qualified as SOP
+import GHC.TypeError (ErrorMessage (Text), TypeError)
 import Plutarch.Builtin.Bool (PBool, pif)
 import Plutarch.Builtin.Integer (PInteger, pconstantInteger)
 import Plutarch.Internal.Eq (PEq, (#==))
 import Plutarch.Internal.Lift (AsHaskell, pconstant)
-import Plutarch.Internal.Term (Dig, S, Term, plet)
+import Plutarch.Internal.Term (Dig, S, Term, plet, RawTerm)
 import Plutarch.Internal.TermCont (hashOpenTerm, unTermCont)
+import Data.Hashable (Hashed)
+import qualified Data.HashMap.Strict as HM
+import Data.Ord (comparing, Down (..))
+import Control.Arrow (Arrow(..))
 
 -- | @since 1.10.0
 newtype PStruct (struct :: [[S -> Type]]) (s :: S) = PStruct
@@ -104,18 +94,44 @@ gstructEq x y =
 @since 1.10.0
 -}
 groupHandlers :: forall (s :: S) (r :: S -> Type). [(Integer, Term s r)] -> Term s PInteger -> Term s r
+-- NOTE: (choener) We have an old and a new method finding the handlers to deal
+-- with. Because the old path uses the digest to order, it is impossible to
+-- always select the same co-optimal set of handlers (unless calculating the
+-- digest, which we don't want). Thus equality is only up to the group size.
 groupHandlers handlers idx = unTermCont $ do
-  handlersWithHash :: [(Integer, (Term s b, Dig))] <-
+  handlersWithHash :: [(Integer, (Term s b, (Dig, Hashed RawTerm)))] <-
     traverse (\(i, t) -> (\hash -> (i, (t, hash))) <$> hashOpenTerm t) handlers
 
   let
-    groupedHandlers :: [([Integer], Term s b)]
-    groupedHandlers =
+#ifdef CMPOLD
+    handlersWithHashOld = map (second (second fst)) handlersWithHash
+    -- old way of getting them
+    groupedHandlersOld :: [([Integer], Term s b)]
+    groupedHandlersOld =
       sortBy (\g1 g2 -> length (fst g1) `compare` length (fst g2)) $
         (\g -> (fst <$> g, fst $ snd $ head g))
           <$> groupBy
             (\x1 x2 -> snd (snd x1) == snd (snd x2))
-            (sortBy (\(_, (_, h1)) (_, (_, h2)) -> h1 `compare` h2) handlersWithHash)
+            (sortBy (\(_, (_, h1)) (_, (_, h2)) -> h1 `compare` h2) handlersWithHashOld)
+#endif
+    handlersWithHashNew = map (second (second snd)) handlersWithHash
+    groupedHandlersNew :: [([Integer], Term s b)]
+    groupedHandlersNew
+      = sortBy (comparing ((length . fst) &&& fst))
+      . map (first (sortBy (comparing Down)))
+      . HM.elems
+      . HM.map (\xs -> (map fst xs, snd $ head xs))
+      . HM.fromListWith (flip (++))
+      $ [ (h,[(i,t)]) | (i,(t, h)) <- handlersWithHashNew ]
+    -- either compare and possibly error or use new way
+    groupedHandlers =
+#ifdef CMPOLD
+      if sort (map (sort . fst) groupedHandlersOld) == sort (map (sort . fst) groupedHandlersNew)
+      then groupedHandlersNew
+      else error $ "groupHandlers: " ++ show (map fst groupedHandlersNew, map fst groupedHandlersOld)
+#else
+      groupedHandlersNew
+#endif
 
   pure $
     let

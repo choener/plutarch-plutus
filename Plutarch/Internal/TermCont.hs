@@ -13,22 +13,12 @@ module Plutarch.Internal.TermCont (
 import Data.Kind (Type)
 import Data.List (nub)
 import Data.String (fromString)
-import Plutarch.Internal.Term (
-  Config (Tracing),
-  Dig,
-  HoistedTerm (..),
-  PType,
-  RawTerm (..),
-  S,
-  Term (Term),
-  TracingMode (DetTracing),
-  asRawTerm,
-  getTerm,
-  hashRawTerm,
-  perror,
-  pgetConfig,
- )
+import Plutarch.Internal.Term (Config (Tracing), Dig, HoistedTerm (..), PType,
+                               RawTerm (..), S, Term (Term),
+                               TracingMode (DetTracing), asRawTerm, getTerm,
+                               hashRawTerm, perror, pgetConfig)
 import Plutarch.Internal.Trace (ptraceInfo)
+import Data.Hashable (Hashed, hashed)
 
 newtype TermCont :: forall (r :: PType). S -> Type -> Type where
   TermCont :: forall r s a. {runTermCont :: (a -> Term s r) -> Term s r} -> TermCont @r s a
@@ -63,10 +53,12 @@ instance MonadFail (TermCont s) where
 tcont :: ((a -> Term s r) -> Term s r) -> TermCont @r s a
 tcont = TermCont
 
-hashOpenTerm :: Term s a -> TermCont s Dig
+hashOpenTerm :: Term s a -> TermCont s (Dig, Hashed RawTerm)
 hashOpenTerm x = TermCont $ \f -> Term $ \i -> do
   y <- asRawTerm x i
-  asRawTerm (f . hashRawTerm . getTerm $ y) i
+  let dig = hashRawTerm $ getTerm y
+      h   = hashed $ getTerm y
+  asRawTerm (f (dig, h)) i
 
 -- This can technically be done outside of TermCont.
 -- Need to pay close attention when killing branch with this.
@@ -85,7 +77,7 @@ pfindPlaceholder idx x = TermCont $ \f -> Term $ \i -> do
     findPlaceholder (RApply x xs) = any findPlaceholder (x : xs)
     findPlaceholder (RForce x) = findPlaceholder x
     findPlaceholder (RDelay x) = findPlaceholder x
-    findPlaceholder (RHoisted (HoistedTerm _ x)) = findPlaceholder x
+    findPlaceholder (RHoisted (HoistedTerm _ _ x)) = findPlaceholder x
     findPlaceholder (RPlaceHolder idx') = idx == idx'
     findPlaceholder (RConstr _ xs) = any findPlaceholder xs
     findPlaceholder (RCase x xs) = any findPlaceholder (x : xs)
@@ -107,7 +99,7 @@ pfindAllPlaceholders x = TermCont $ \f -> Term $ \i -> do
     findPlaceholder (RApply x xs) = findPlaceholder x <> foldMap findPlaceholder xs
     findPlaceholder (RForce x) = findPlaceholder x
     findPlaceholder (RDelay x) = findPlaceholder x
-    findPlaceholder (RHoisted (HoistedTerm _ x)) = findPlaceholder x
+    findPlaceholder (RHoisted (HoistedTerm _ _ x)) = findPlaceholder x
     findPlaceholder (RPlaceHolder idx) = [idx]
     findPlaceholder (RConstr _ xs) = foldMap findPlaceholder xs
     findPlaceholder (RCase x xs) = findPlaceholder x <> foldMap findPlaceholder xs

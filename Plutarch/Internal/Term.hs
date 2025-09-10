@@ -1,6 +1,8 @@
 {-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE NoPartialTypeSignatures #-}
+-- for compatibility with plutus-core 1.45 / 1.51 imports of UPLC
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 
 module Plutarch.Internal.Term (
   -- | \$hoisted
@@ -79,6 +81,7 @@ import PlutusCore qualified as PLC
 import PlutusCore.DeBruijn (DeBruijn (DeBruijn), Index (Index))
 import Prettyprinter (Pretty (pretty), (<+>))
 import UntypedPlutusCore qualified as UPLC
+import UntypedPlutusCore.Transform.Simplifier qualified as UPLC
 
 {- $hoisted
  __Explanation for hoisted terms:__
